@@ -1,10 +1,10 @@
 # Contributing to Full Truckload APIs (WIP)
 
-If you would like to contribute to this project
+The following sections describe how to contribute to this repository.
 
 ## Using GitHub Discussions
 
-We use GitHub discussions to facilitate conversations related to the project. If you have ideas that may not be fully fleshed out, start with discussions to begin the conversation with [Digital Standards Development Council (DSDC)] members. A member can answer your questions or guide you to next steps if you would like to get involved.
+We use GitHub discussions to facilitate conversations related to the project. If you have ideas that may not be fully fleshed out, start with discussions to begin the conversation with Digital Standards Development Council (DSDC) members. A member can answer your questions or guide you to next steps if you would like to get involved.
 
 ## Using GitHub Issues
 
