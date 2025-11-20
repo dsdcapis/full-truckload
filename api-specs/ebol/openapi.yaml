@@ -1,0 +1,330 @@
+openapi: 3.1.0
+info:
+  title: Electronic Bill Of Lading API
+  version: "1.0.0"
+  description: |
+    # Overview
+    
+    The NMFTA has partnered with leaders across the transportation industry to deliver a digitized
+    method of transferring data between parties. By developing open-source API standards, the
+    NMFTA and its partners will open the door to a more efficient method of data transfer, which
+    today is still accomplished through a variety of more rudimentary processes. Digital API
+    standards will reduce costs to onboard new business partners, improve visibility to shipment
+    information, allow for real time notification on shipment changes, and drive out waste across
+    the industry by eliminating manual processes. API standards will empower technological
+    development, particularly when it comes to process automation.
+
+    The Bill of Lading (BOL) is a crucial document that communicates the details and expectations
+    for a specific freight shipment. It is a legally binding document issued by the Carrier to the
+    Shipper that defines the shipment (type, quantity, origin, etc.), and is the basis of the business
+    transaction between a Shipper and a Carrier. The current BOL process consists of a physical
+    document transported between parties that is frequently lost, stolen, or delayed in being
+    documented for all parties to review. This council will create an electronic Bill of Lading API
+    standard that will allow for a more efficient and streamlined BOL process that will reduce or
+    eliminate some of the risks associated with the current BOL process.
+
+    Because the BOL sets the expectations for a shipment, it serves as the foundation for
+    processes later in the shipment lifecycle. Similarly, the eBOL defined by the Digital Council will
+    provide the foundation for the other APIs that will be defined to handle other business
+    processes. An eBOL will act as a digital twin of a physical BOL document, containing the same
+    crucial shipment information and carrying the same importance.
+
+    ## Value Proposition
+
+    - **Shipper:** The eBOL API will allow a Shipper to more easily share the official details of a
+      shipment, reducing opportunities for misunderstanding, human error, and theft. With
+      existing BOL processes, particularly for a LTL shipment, a Shipper does not have
+      visibility to the PRO number or shipment status until Pickup occurs. With the eBOL API,
+      the Shipper will receive the PRO number pre-pickup, and in conjunction with other
+      standard APIs, will be able to receive pre-pickup visibility on their loads.
+      
+      Additionally, current processes leave open the possibility for theft when bad actors
+      manipulate physical BOL’s to hide evidence of theft, and makes it difficult for Shippers
+      to prove otherwise. An electronic BOL process will reduce these opportunities and give
+      Shipper’s peace of mind.
+
+      A Shipper will initiate the eBOL process by sending the details of their shipment to a
+      Carrier using the standard API format. They will receive back from the Carrier a
+      completed BOL and shipping label. The response will also include a unique shipment
+      identifier (PRO in the case of an LTL shipment) that can be used to reference the
+      shipment in future interactions with the Carrier, including tracking update requests.
+
+    - **Carrier:** The eBOL API will be especially beneficial to the Carrier community by
+      outlining the standard communication protocol for sharing BOL information, greatly
+      simplifying the connectivity required to do business with a large number of shippers,
+      customers, and third parties. Among other things this will improve billing accuracy,
+      reduce opportunity for manual errors, and allow Carriers to provide better service to
+      customers.
+
+      A Carrier will receive details of a shipment via the eBOL API from the Shipper, store the
+      information in their system, and return the official BOL back to the Shipper. They will
+      also return a shipping label that the Shipper can print and attach to their shipment. As
+      part of this, they will also return a unique load identifier (in the case of an LTL shipment,
+      it will be the PRO number) back to the Shipper that can be used to reference their load
+      going forward.
+
+    - **3rd Party:** The eBOL API will allow third parties of all kinds to receive and send the
+      necessary shipment information to ensure a seamless flow through the life cycle of a
+      shipment. Due to the nature of 3rd parties’ business and having to interact with multiple
+      parties in the transportation industry, 3rd parties stand much to gain by simplification of
+      their business processes, which the eBOL will enable.
+
+    ## LTL
+
+    In the LTL industry, the BOL is a particularly valuable document due to the inherent
+    complexities of an LTL shipment. Not only does an LTL BOL contain general shipment
+    information (such as origin, destination, billing info), but it also contains very detailed
+    information on the freight being shipped, down to the commodity information of each
+    individual line item. Because of this, any eBOL solution for an LTL shipment must be very
+    detailed, while still allowing for significant variations from shipment to shipment.
+
+    The NMFTA LTL Digital Council has already defined and released standards for eBOL in the LTL
+    industry. Its usage is being adopted by Shippers, Carriers, and 3PLs, and is being put to use to
+    drive efficiency and automation for LTL shipments.
+    
+    ## FTL
+
+    The BOL for a Full Truckload shipment serves the same purpose and contains similar
+    information to that of an LTL shipment. The main difference between a FTL and LTL is the level
+    of detail is usually less for a FTL shipment. A FTL BOL may not include a PRO number, NMFC
+    Codes, Classification, and often will not include pallet counts and reliable dimensions.
+    The NMFTA FTL Digital Council will be coordinating with their LTL Council counterparts to look
+    to find an opportunity for a single, combined eBOL standard that meets the needs of both the
+    LTL and FTL use cases. The synergy between the two will help drive adoption throughout the
+    transportation industry, where many organizations are involved in both FTL and LTL
+    transportation.
+
+    # Definitions
+
+    **Application Programming Interface (API):** A set of rules and protocols that enable
+    software applications to communicate to one another; facilitating the exchange of
+    information between systems.
+
+    **Appointment:** A scheduled agreement between two parties for a specific time to
+    transfer goods. Most commonly this is between a Carrier and Shipper for the pickup of
+    goods at the origin, or between a Carrier and Consignee for the delivery of goods at the
+    destination.
+
+    **Bill of Lading (BOL):** Legally binding document issued by the Carrier to the Shipper
+    that defines the shipment (type, quantity, origin, etc.), and is the basis of the business
+    transaction between a Shipper and a Carrier.
+
+    **Carrier:** Business entity charged with the physical move of goods.
+    Consignee/Receiver: The entity that receives the goods from the Carrier at the
+    destination location.
+
+    **Equipment:** The type of transport device used to haul goods within a shipment. (Ex.
+    Flatbed, DryVan, Refrigerated, Intermodal Container)
+
+    **Full Truckload (FTL):** A shipment where the entire truck or container is used to ship the
+    goods of a single Customer.
+
+    **Less Than Truckload (LTL):** A shipment where a single truck contains the goods from
+    different Shippers, often picking up and delivering at different locations.
+
+    **Shipment:** A quantity of goods or merchandise that is being, or has been, transported
+    from one location to another by a Carrier. It represents the collective items included in a
+    single act of transportation.
+
+    **Shipper:** The entity that provides the goods being shipped to the Carrier at the origin
+    location.
+
+    **Tender:** A formal request from a Shipper to a Carrier to move a specific shipment
+
+    # Best Practices
+
+    ## Unique Shipment Identifiers
+    
+    Within the requirements, you may notice that it is required for Carriers to provide a way for
+    Shippers/3rd Parties to uniquely identify their shipment via a reference number identifier. The
+    API defines these identifiers as follows:
+
+    - The shipment's pro number
+      - LTL only
+    - The shipment's quote ID
+    - The shipment's load number
+    - The shipment's master BOL
+    - The shipment's trailer ID
+    - The shipment's manifest ID
+    - The shipment's BOL number
+    - The shipment's purchase order (PO) number
+    - The shipment's additional reference number
+      - Available to capture any reference number not provided for in the specification
+    
+    However, it is not required to include any one particular identifier. This is intentional as NMFTA
+    does not want to prescribe for a system what information they may or may not need.
+    Ultimately, it will be up to the discretion of the system to clearly define via their own
+    documentation if specific identifiers laid out by the NMFTA are required or optional for their specific implementation. As a rule of thumb, you should provide additional information about
+    the shipment if you are uncertain if the information you originally planned to provide will
+    adequately identify the shipment.
+
+    ## Optional Information
+
+    Many value fields in the API requirements are optional and are not required to constitute a valid
+    Bill of Lading. However, NMFTA recommends a Shipper/3rd Party provide as much information
+    as possible to enable a more robust and effective digital process. More information usually
+    results in a better experience by all parties involved.
+
+tags:
+  - name: Carrier API Standards
+    description: Standards for Carrier APIs
+paths:
+  /bol/v1/app:
+    post:
+      summary: Create/Update/Delete an Electronic Bill of Lading
+      operationId: bol
+      description: |
+        ## Request
+
+        As a Shipper/3rd Party, I want to Create/Update/Delete an Electronic Bill of Lading and send shipment
+        information for a particular shipment to a Carrier.
+
+        - In a request, the Shipper/3rd Party MUST identify themselves so the Carrier is aware of
+        who is sending the BOL information
+          - Types of Roles: Shipper, Third Party, Consignee
+        - In a request, the Shipper/3rd Party MUST provide a requested pickup date. The
+        requested pickup date MUST be in date/time format. The API will allow for a Pickup
+        Begin and Pickup End date/time.
+          - LTL Consideration: The requested pickup date is NOT a formal LTL Pickup
+        Request
+        - In a request, the Shipper/3rd Party MUST designate the origin and destination for the
+        shipment. This can be via a location id understood by both parties, or via the address of
+        the location.
+        - In a request, the Shipper/3rd Party MAY designate whether or not they want an image of
+        the BOL and/or Shipping Labels returned in the response.
+        - In a request, the Shipper/3rd Party MAY designate a reference number associated with
+        their shipment.
+        - In a request, the Shipper/3rd Party MUST specify freight Billing terms for the shipment.
+        - In a request, the Shipper/3rd Party MUST specify the Billing information for the shipment,
+        including name, address, and contact information.
+        - In a request, a Shipper/3rd Party MAY provide special shipment requirements that would
+        indicate if accessorials are needed.
+          - Examples Include, but not limited to:
+            - Limited Access
+            - Time Critical
+            - Lift Gate Required
+            - Expedite
+        - In a request, the Shipper/3rd Party MUST specify the commodity of the freight being
+        shipped.
+          - LTL Consideration: The classification of LTL commodities MUST be included for
+        an LTL shipment
+        - In a request, additional details on the shipment MAY be included. The API will allow for
+        information to be provided at both the commodity level, as well as at the total shipment
+        level.
+          - LTL Consideration: The weight, handling units, and dimensions of an LTL
+        shipment MUST be included
+          - Examples include:
+            - Weight
+            - Handling Units
+            - Linear Length
+            - Overall Dimensions
+        - Shipper/3rd Party SHOULD provide details for a HAZMAT shipment. This information
+        with be conditionally required based on U.S. Department of Transportation's (DOT)
+        Hazardous Materials Regulations (49 CFR Parts 171-180). This includes:
+          - Hazardous Description
+          - Total Quantity
+            - Weight or Volume (i.e. lbs, kilograms, liters, etc.)
+          - Hazard class or Division
+          - Identification Number (UN/NA)
+          - Proper Name
+          - Technical Name
+          - Packaging Group
+          - Emergency Response
+            - 24-Hour Emergency Response
+            - Emergency Response Guidebook (ERG) Guide Number
+          - Marine Pollutant Marking
+          - Contact Number
+        - Shipper/3rd Party SHOULD provide Total Shipment Value in a designated currency (USD
+        as an option) for high value shipments that may require additional considerations by the
+        Carrier.
+
+        ## Response
+
+        As a Carrier, I want to respond to the Shipper/3rd Party who created the electronic Bill of Lading
+        and either accept or reject, as well as provide a unique shipment identifier associated with the
+        shipment.
+
+        - In a response, the Carrier must indicate if the eBOL was successfully accepted
+          - Reasons an eBOL request would be rejected:
+            - Not enough information provided in eBOL request
+            - Internal error in Carrier system (example: PRO number Shipper sent
+            already associated with a different shipment)
+        - In a response, the Carrier MUST provide the timestamp of the transaction date for the
+        electronic bill of lading.
+        - In a response, the Carrier MUST designate a reference number to uniquely identify the
+        shipment, if one was not provided in the request.
+          - If a reference number was provided in the request, then it MUST be provided in
+          the response.
+          - Reference Best Practices for list of available reference number types.
+        - The Carrier MUST provide BOL details in the response, and MUST provide a PDF image
+        of the BOL and Shipping labels if requested in the Request body.
+      tags:
+        - Carrier API Standards
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: './schemas/external-specs/ltl-ebol-2.1.0-openapi.yaml#/components/schemas/BOL_Request'
+                - $ref: '#/components/schemas/FTL_BOL_Request'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: './schemas/external-specs/ltl-ebol-2.1.0-openapi.yaml#/components/schemas/BOL_Response'
+                  - $ref: '#/components/schemas/FTL_BOL_Response'
+        '400':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: './schemas/external-specs/ltl-ebol-2.1.0-openapi.yaml#/components/schemas/Result_Status_Codes'
+                    - $ref: './schemas/ftl.yaml#/components/schemas/Result_Status_Codes'
+components:
+  schemas:
+    FTL_BOL_Request:
+      allOf:
+        - type: object
+          required:
+            - bol
+            - version
+          properties:
+            bol:
+              allOf:
+                - type: object
+                  required:
+                    - function
+                  properties:
+                    function:
+                      type: string
+                      description: |
+                        The intent for the submitted request.
+                      enum:
+                        - Create
+                        - Update
+                        - Delete
+                - $ref: './schemas/ftl.yaml#/components/schemas/BOL_Header'
+            version:
+              $ref: '#/components/schemas/FTL_Version'
+        - $ref: './schemas/ftl.yaml#/components/schemas/BOL_Request'
+    FTL_BOL_Response:
+      allOf:
+        - type: object
+          properties:
+            version:
+              $ref: '#/components/schemas/FTL_Version'
+        - $ref: './schemas/ftl.yaml#/components/schemas/BOL_Response'
+    FTL_Version:
+      title: Version
+      type: string
+      description: |
+        Indicates which version of the Digital FTL Council Bill of Lading spec you are consuming
+      enum:
+        - 1.0.0-TL
