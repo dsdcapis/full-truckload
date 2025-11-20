@@ -2,6 +2,12 @@ openapi: 3.1.0
 info:
   title: Electronic Bill Of Lading API
   version: "1.0.0-public-preview"
+  contact:
+    name: DSDC APIs Full Truckload
+    url: https://github.com/dsdcapis/full-truckload
+  license:
+    name: DSDC Repository License
+    url: https://github.com/dsdcapis/full-truckload/blob/main/LICENSE.md
   description: |
     # Overview
     
