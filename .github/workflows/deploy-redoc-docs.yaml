@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Make script executable
+      run: chmod +x ./.github/scripts/create-redoc-static-html.sh
     - name: Build docs
       run: ./.github/scripts/create-redoc-static-html.sh
     - name: Deploy to GitHub Pages
