@@ -2,19 +2,20 @@
 set -e
 
 currentFolder="$(pwd)"
+apiSpecFolder="$currentFolder/api-specs"
 publicFolder="$currentFolder/public"
 allFolders=()
 
-# Finds all directories containing openapi.yaml files in currentFolder and returns their paths as an array
+# Finds all directories containing openapi.yaml files in apiSpecFolder and returns their paths as an array
 findAllOpenApiYamlDirs() {
     local -n resultRef=$1
 
     resultRef=()
     while IFS= read -r -d '' dir; do
-        # Remove the $currentFolder prefix and leading slash if present
-        rel_dir="${dir#$currentFolder/}"
+        # Remove the $apiSpecFolder prefix and leading slash if present
+        rel_dir="${dir#$apiSpecFolder/}"
         resultRef+=("$rel_dir")
-    done < <(find "$currentFolder" -type f -name "openapi.yaml" -print0 | xargs -0 -n1 dirname -z | sort -zu)
+    done < <(find "$apiSpecFolder" -type f -name "openapi.yaml" -print0 | xargs -0 -n1 dirname -z | sort -zu)
 }
 
 # Creates static html files for openapi.yaml file in the current directory
@@ -24,8 +25,8 @@ loadStaticHtmlToFolder() {
     echo "Creating folder \"$publicFolder/$folder\""
     mkdir -p "$publicFolder/$folder"
 
-    echo "Running redocly/cli build-docs command on \"$currentFolder/$folder/openapi.yaml\" and saving it to \"$publicFolder/$folder/index.html\""
-    npx @redocly/cli@latest build-docs "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/index.html"
+    echo "Running redocly/cli build-docs command on \"$apiSpecFolder/$folder/openapi.yaml\" and saving it to \"$publicFolder/$folder/index.html\""
+    npx @redocly/cli@latest build-docs "$apiSpecFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/index.html"
 }
 
 # Generates a high-level index for the Redoc static HTML documentation.
@@ -55,7 +56,6 @@ generateHighLevelIndex() {
     }
 </style>
 <body>
-    <img class="logo" src="assets/DSDC-LTL.svg" alt="Company Logo">
     <p>Supported by the Digital Standard Development Council's (DSDC) Digital LTL Council, these API standards help organizations modernize LTL workflows through standardized, open, and scalable integration.</p>
     <h1>API Documentation Index</h1>
     <ul>" > "$indexFile"
@@ -98,12 +98,6 @@ generateHighLevelIndex() {
     echo "Created high level index at \"$indexFile\""
 }
 
-copyAssets() {
-    echo "Copying assets..."
-    mkdir -p "$publicFolder/assets"
-    cp "$currentFolder/assets/DSDC-LTL.svg" "$publicFolder/assets/"
-}
-
 # mainProcess is the primary function that orchestrates the creation of a static HTML file
 # for ReDoc documentation. It handles the main workflow, including any necessary setup,
 # execution of commands, and error handling required to generate the documentation output.
@@ -116,7 +110,6 @@ mainProcess() {
     done
 
     generateHighLevelIndex
-    copyAssets
 }
 
 mainProcess

@@ -29,7 +29,7 @@ info:
     processes. An eBOL will act as a digital twin of a physical BOL document, containing the same
     crucial shipment information and carrying the same importance.
 
-    ## Value Proposition
+    # Value Proposition
 
     - **Shipper:** The eBOL API will allow a Shipper to more easily share the official details of a
       shipment, reducing opportunities for misunderstanding, human error, and theft. With
@@ -94,77 +94,9 @@ info:
     transportation industry, where many organizations are involved in both FTL and LTL
     transportation.
 
-    # Definitions
+    # Product Requirements Document (PRD)
 
-    **Application Programming Interface (API):** A set of rules and protocols that enable
-    software applications to communicate to one another; facilitating the exchange of
-    information between systems.
-
-    **Appointment:** A scheduled agreement between two parties for a specific time to
-    transfer goods. Most commonly this is between a Carrier and Shipper for the pickup of
-    goods at the origin, or between a Carrier and Consignee for the delivery of goods at the
-    destination.
-
-    **Bill of Lading (BOL):** Legally binding document issued by the Carrier to the Shipper
-    that defines the shipment (type, quantity, origin, etc.), and is the basis of the business
-    transaction between a Shipper and a Carrier.
-
-    **Carrier:** Business entity charged with the physical move of goods.
-    Consignee/Receiver: The entity that receives the goods from the Carrier at the
-    destination location.
-
-    **Equipment:** The type of transport device used to haul goods within a shipment. (Ex.
-    Flatbed, DryVan, Refrigerated, Intermodal Container)
-
-    **Full Truckload (FTL):** A shipment where the entire truck or container is used to ship the
-    goods of a single Customer.
-
-    **Less Than Truckload (LTL):** A shipment where a single truck contains the goods from
-    different Shippers, often picking up and delivering at different locations.
-
-    **Shipment:** A quantity of goods or merchandise that is being, or has been, transported
-    from one location to another by a Carrier. It represents the collective items included in a
-    single act of transportation.
-
-    **Shipper:** The entity that provides the goods being shipped to the Carrier at the origin
-    location.
-
-    **Tender:** A formal request from a Shipper to a Carrier to move a specific shipment
-
-    # Best Practices
-
-    ## Unique Shipment Identifiers
-    
-    Within the requirements, you may notice that it is required for Carriers to provide a way for
-    Shippers/3rd Parties to uniquely identify their shipment via a reference number identifier. The
-    API defines these identifiers as follows:
-
-    - The shipment's pro number
-      - LTL only
-    - The shipment's quote ID
-    - The shipment's load number
-    - The shipment's master BOL
-    - The shipment's trailer ID
-    - The shipment's manifest ID
-    - The shipment's BOL number
-    - The shipment's purchase order (PO) number
-    - The shipment's additional reference number
-      - Available to capture any reference number not provided for in the specification
-    
-    However, it is not required to include any one particular identifier. This is intentional as NMFTA
-    does not want to prescribe for a system what information they may or may not need.
-    Ultimately, it will be up to the discretion of the system to clearly define via their own
-    documentation if specific identifiers laid out by the NMFTA are required or optional for their specific implementation. As a rule of thumb, you should provide additional information about
-    the shipment if you are uncertain if the information you originally planned to provide will
-    adequately identify the shipment.
-
-    ## Optional Information
-
-    Many value fields in the API requirements are optional and are not required to constitute a valid
-    Bill of Lading. However, NMFTA recommends a Shipper/3rd Party provide as much information
-    as possible to enable a more robust and effective digital process. More information usually
-    results in a better experience by all parties involved.
-
+    The Product Requirements Document (PRD) for this API can be found [here](https://github.com/dsdcapis/full-truckload/blob/main/api-prds/API%20Product%20Requirements%20-%20eBOL.pdf).
 tags:
   - name: Carrier API Standards
     description: Standards for Carrier APIs

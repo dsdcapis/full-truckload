@@ -2,8 +2,24 @@ openapi: 3.1.0
 info:
   title: Invoice & Document API
   version: "1.0.0"
-  description: API for managing invoices and supporting documents in the logistics industry.
+  description: |
+    # Overview
 
+    NMFTA is on a journey with logistical and banking institutions to transform the electronic transfer of invoice data and supporting documents through an open-source API. Systems across the economic landscape will leverage this information to bring speed through data availability. Today, EDI and digital document uploads across numerous company specific applications are required for doing business within the logistical sector. Ultimately, this work will include managing a corpus of electronic data values and document file type returns with the focus on the transfer of the Invoice and supporting documents supporting all logistical types.
+
+    Part of the journey is to build an open API to ensure all logistical and banking partners to reach a level of automation that scales with the business demand. With adoption of the FTL council, medium- and long-term value will be achieved for all parties across the economic markets and transportation providers. Teams from DSDC (Digital Standards Development Council) and support from the LTL council have come together for a collective goal to achieve business value for all.
+
+    **The GAP:** Multiple sources and various technology implementations have created an endless landscape for shippers, carriers, and banking institutions that continue to empower antiquated physical documentation or outgrown EDI processes. APIs do not currently have all consistent components to fully operationalize document data transfers and document type dissemination, especially in the areas of "invoice data values", "bill of lading" and "freight bills"
+
+    **Value Proposition:** The Invoice and Documents API will allow for the ability to seamlessly pass specific invoice and related shipment information regardless of transport type to obtain or pass an invoice or related documentation. This will transform the logistics industry by simplification of complex billing processes through accuracy and timeliness in one place will be paramount for all shipments. With a design to handle all complexities for any shipment, a simplified standard source will meet all business needs quickly while providing companies with the needed forecasting for growth.
+
+    - **Carriers:** Providing the ability to pass and create an invoice through details to a Shipper or 3rd Party through standard shipment details. Additional documentation will also be able to be passed for additional proof of payment through supporting document types through shipment criteria. The ease will allow for Carriers to ensure that they avoid being cornered within the market.
+    - **Shippers:** Receiving Carrier invoices and supplemental documentation for payment will allow for central standard empowering timely and accurate validation of services while providing the ability to eliminate slower physical or open-source transfers.
+    - **3rd Party:** Ensuring no delay in data validation or accuracy in supplying the appropriate information to support Invoice and supporting documentation for all parties
+
+    # Product Requirements Document (PRD)
+
+    The Product Requirements Document (PRD) for this API can be found [here](https://github.com/dsdcapis/full-truckload/blob/main/api-prds/API%20Product%20Requirements%20-%20Invoice%20Documents.pdf).
 tags:
   - name: Invoice Management
     description: Endpoints for creating, retrieving, and managing invoices.
