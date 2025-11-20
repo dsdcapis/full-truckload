@@ -1,7 +1,13 @@
 openapi: 3.1.0
 info:
   title: Invoice & Document API
-  version: "1.0.0"
+  version: "1.0.0-public-preview"
+  contact:
+    name: DSDC APIs Full Truckload
+    url: https://github.com/dsdcapis/full-truckload
+  license:
+    name: SSC Scheduling Specification V1 License
+    url: https://github.com/dsdcapis/full-truckload/blob/main/LICENSE.md
   description: |
     # Overview
 

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Electronic Bill Of Lading API
-  version: "1.0.0"
+  version: "1.0.0-public-preview"
   description: |
     # Overview
     

@@ -18,6 +18,10 @@ The [api-prds](./api-prds) folder contains Product Requirement Documents (PRDs) 
 
 The [api-specs](./api-specs) folder contains OpenAPI specification files for the APIs in this repository. These specifications define the structure, request/response formats, and other technical details of each API in a standardized format.
 
+## Read the Specs
+
+To read the specs, visit [dsdcapis.github.io/full-truckload/](https://dsdcapis.github.io/full-truckload/)
+
 ## Participation
 
 See the [CONTRIBUTING file](CONTRIBUTING.md) in the repository for more details on how to participate.
