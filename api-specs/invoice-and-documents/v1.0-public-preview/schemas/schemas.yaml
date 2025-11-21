@@ -1,0 +1,747 @@
+openapi: 3.1.0
+info:
+  title: Invoice and Documents Schemas
+  version: 1.0.0-TL
+  description: >-
+    This file contains the schema definitions for the Invoice and Documents API.
+components:
+  schemas:
+    SuccessMessage:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message.
+          example: Invoice created successfully
+
+    InvoiceIdentifiers:
+      title: Invoice Identifiers
+      description: Identifiers for an invoice.
+      type: object
+      required: [ uniqueID, shipmentID, DOT, MC ]
+      properties:
+        uniqueID:
+          type: string
+          description: Unique identifier for the invoice.
+        shipmentID:
+          type: string
+          description: Unique identifier for the shipment associated with the invoice.
+        DOT:
+          type: string
+          description: Department of Transportation identifier
+        MC:
+          type: string
+          description: Motor Carrier Identifier
+        invoiceNumber:
+          type: string
+          description: Invoice number
+
+    Invoice:
+      title: Invoice
+      description: Request object for creating an invoice. This includes all necessary identifiers and optional
+        information to ensure proper tracking and processing of the invoice.
+      type: object
+      required: [ uniqueID, shipmentID, DOT, MC, invoiceHeader, invoiceCharges ]
+      properties:
+        uniqueID:
+          type: string
+          description: Unique identifier for the invoice.
+        shipmentID:
+          type: string
+          description: Unique identifier for the shipment associated with the invoice.
+        DOT:
+          type: string
+          description: Department of Transportation identifier
+        MC:
+          type: string
+          description: Motor Carrier Identifier
+        invoiceHeader:
+          $ref: '#/components/schemas/InvoiceHeader'
+        invoiceCharges:
+          $ref: '#/components/schemas/InvoiceCharges'
+        attributes:
+          description: List of attributes associated with the invoice.
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+        comments:
+          description: List of comments associated with the invoice.
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+
+    InvoiceHeader:
+      title: Invoice Header
+      description: Header fields for an invoice including consignor, consignee, billing party, terms, and invoice details.
+      type: object
+      required: [ consignor, consignee, billingParty, terms, invoiceNumber, invoiceDate, invoiceAmount ]
+      properties:
+        consignor:
+          type: object
+          description: Consignor information for the shipment.
+          properties:
+            consignorName:
+              type: string
+            address:
+              $ref: '#/components/schemas/PostalAddress'
+        consignee:
+          type: object
+          description: Consignee information for the shipment.
+          properties:
+            consigneeID:
+              type: string
+              description: Unique identifier for the consignee.
+            consigneeName:
+              type: string
+            address:
+              $ref: '#/components/schemas/PostalAddress'
+        billingParty:
+          type: object
+          description: Billing party information for the invoice.
+          properties:
+            billingPartyName:
+              type: string
+            address:
+              $ref: '#/components/schemas/PostalAddress'
+        terms:
+          $ref: '#/components/schemas/Terms'
+        invoiceNumber:
+          type: string
+        invoiceDate:
+          type: string
+          format: date
+        invoiceAmount:
+          $ref: '#/components/schemas/MonetaryAmount'
+
+    Terms:
+      title: Terms
+      type: object
+      description: Terms and conditions associated with the invoice.
+      properties:
+        billingTerms:
+          type: string
+          description: Billing Terms for the invoice.
+          enum: [ Prepaid, Collect, Third Party ]
+          example: Prepaid
+        paymentTerms:
+          type: string
+          description: Payment terms for the invoice.
+          example: "Net 30"
+        paymentDueDate:
+          type: string
+          format: date
+          description: Date upon which payment is due.
+          example: "2024-11-20"
+        cancellationPolicy:
+          type: string
+          description: Cancellation policy for the invoice.
+          example: "No cancellations after 30 days"
+        disputeResolution:
+          type: string
+          description: Dispute resolution process for the invoice.
+          example: "All disputes must be resolved within 60 days"
+
+    Comment:
+      title: Comment
+      description: A comment object
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the comment.
+          example: 123456
+        commentText:
+          type: string
+          description: The comment text.
+          example: "This is a sample comment."
+
+    InvoiceCharges:
+      title: Invoice Charges
+      description: List of all charges on the invoice.
+      type: array
+      items:
+        anyOf:
+          - $ref: '#/components/schemas/Charge'
+          - $ref: '#/components/schemas/ItemCharge'
+          - $ref: '#/components/schemas/HandlingUnitCharge'
+
+    Charge:
+      title: Charge
+      description: A charge object that can be added to a invoice.
+      allOf:
+        - $ref: '#/components/schemas/BaseCharge'
+        - type: object
+          required: [ chargeCode, chargeUnitCode ]
+          properties:
+            chargeCode:
+              type: string
+              description: Type of charge code specific to your company.
+              example: LINEHAUL
+            chargeUnitCode:
+              type: string
+              description: The level by which the rate is calculated, e.g., Flat, Per Mile, Per Weight, etc.
+              enum: [ FLAT, UNIT_RATE ]
+              example: FLAT
+            chargeDiscount:
+              $ref: '#/components/schemas/ChargeDiscount'
+
+    BaseCharge:
+      title: Base Charge
+      description: Base charge object.
+      type: object
+      required: [ chargeType ]
+      properties:
+        accountCode:
+          type: string
+          description: General ledger accounting code.
+          example: "01"
+        chargeType:
+          type: string
+          enum: [ BASE_CHARGE, ITEM_CHARGE, HANDLING_UNIT_CHARGE ]
+          description: Type of charge.
+          example: BASE_CHARGE
+        chargeDescription:
+          type: string
+          description: Description for a charge.
+        specialInstructions:
+          type: string
+          description: Descriptive text detailing any instructions related to the invoice or servicing of the shipment.
+          example: Handle with care.
+        hazmat:
+          type: string
+          description: Hazardous classification and placard notation.
+          example: HAZ.
+        stopNumber:
+          type: string
+          description: Sequence number of the routing stop.
+          pattern: '^\d+$'
+          example: "1"
+        cost:
+          $ref: '#/components/schemas/MonetaryAmount'
+        quantity:
+          $ref: '#/components/schemas/Quantity'
+        comments:
+          description: List of comments tied to the charge.
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+
+        #attributes:
+        #  description: A list of charge attributes.
+        #  type: array
+        #  items:
+        #    $ref: '#/components/schemas/Attribute'
+
+        chargeAuthorizerDetails:
+          $ref: '#/components/schemas/ChargeAuthorizerDetails'
+
+    ChargeDiscount:
+      title: Charge Discount
+      description: Discount object for a charge.
+      type: object
+      properties:
+        discountTypeCode:
+          type: string
+          enum: [ DISCOUNT_APPLIED, UNDISCOUNTED ]
+          description: Discount type
+          example: UNDISCOUNTED
+        discountValue:
+          type: number
+          format: double
+          description: Discount value.
+          example: 0.0
+
+    ChargeAuthorizerDetails:
+      title: Charge Authorizer Details
+      description: Contact authorizing the charge.
+      type: object
+      properties:
+        authorizerTitle:
+          description: The title of the charge authorizer.
+          type: string
+          example: Mr
+        authorizerName:
+          description: The full name of the charge authorizer.
+          type: string
+          example: John Doe
+        authorizerFirstName:
+          description: The first name of the charge authorizer.
+          type: string
+          example: John
+        authorizerMiddleInitial:
+          description: The middle initial of the charge authorizer.
+          type: string
+          example: M
+        authorizerLastName:
+          description: The last name of the charge authorizer.
+          type: string
+          example: Doe
+        authorizerNumber:
+          description: Charge authorizer number.
+          type: string
+          example: BATCH123
+        phoneNumber:
+          description: Phone number associated with this charge authorizer.
+          type: string
+          example: 555-555-5555
+        email:
+          description: Email address associated with this charge authorizer.
+          type: string
+          example: john.doe@jbhunt.com
+
+    ItemCharge:
+      title: Item Charge
+      description: An item charge object that can be added to a invoice.
+      allOf:
+        - $ref: '#/components/schemas/Charge'
+        - type: object
+          required: [ itemId ]
+          properties:
+            itemId:
+              type: integer
+              format: int64
+              description: Unique identifier for an item to which the charge code is associated
+              example: 456783
+            itemUUID:
+              type: string
+              format: uuid
+              description: Universally unique identifier for an item in a GUID format.
+              example: "AD4BD501-F3E1-108D-9266-862B2438864F"
+            freightClassCode:
+              type: string
+              description: Freight of All Kinds (FAK). Groups products of different classes at one standardized freight class so that they are billed or rated at the same class.
+              example: "55"
+            weight:
+              $ref: '#/components/schemas/Weight'
+            dimension:
+              $ref: '#/components/schemas/Dimension'
+            itemDescription:
+              description: Item description.
+              type: string
+              example: "Shoes"
+            nmfcNumber:
+              description: |
+                The class number of National Motor Freight Classification (NMFC), a standard that provides a comparison of commodities moving in interstate, intrastate and foreign commerce. 
+                It specifies minimum packaging requirements to ensure that goods are adequately protected and can be handled and stowed in a manner that is reasonably safe and practicable for withstanding the normal rigors of the less-than-truckload environment.
+              type: string
+              example: "156600"
+            itemPackageType:
+              type: string
+              description: Packaging for item(s). Allowed Values - Bags, Barrels, Bins, Boxes, Buckets, Bundles, Case, Casks, Crates, Drums, Gaylords, Kegs, Pallets, Pieces, Reels, Rolls, Skids, Spools, Totes, etc.
+              example: "Pieces"
+            itemPackageQuantity:
+              type: number
+              description: Quantity of items being shipped.
+              example: 1
+            stackable:
+              type: boolean
+              description: Whether the item is stackable or not.
+              example: true
+
+    HandlingUnitCharge:
+      title: Handling Unit Charge
+      description: A handling unit charge object that can be added to a invoice.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Charge'
+        - type: object
+          required: [ handlingUnitId ]
+          properties:
+            handlingUnitId:
+              type: integer
+              format: int64
+              description: Unique identifier for the handling unit to which the charge code is associated.
+            handlingUnitUUID:
+              type: string
+              format: uuid
+              description: Universally unique identifier for the handling unit in a GUID format.
+              example: "AD4BD501-F3E1-108D-9266-862B2438864F"
+            freightClassCode:
+              type: string
+              description: Freight of All Kinds (FAK). Groups handling units of different classes at one standardized freight class so that they are billed or rated at the same class.
+              example: "55"
+            weight:
+              $ref: '#/components/schemas/Weight'
+            dimension:
+              $ref: '#/components/schemas/Dimension'
+            handlingUnitDescription:
+              description: Handling unit description.
+              type: string
+              example: "Shoes"
+            handlingUnitPackageType:
+              type: string
+              description: Packaging for handling unit(s). Allowed values - Bags, Barrels, Bins, Boxes, Buckets, Bundles, Case, Casks, Crates, Drums, Gaylords, Kegs, Pallets, Pieces, Reels, Rolls, Skids, Spools, Totes, etc.
+              example: "Pieces"
+            handlingUnitPackageQuantity:
+              type: number
+              description: Quantity of handling units being shipped.
+              example: 1
+            stackable:
+              type: boolean
+              description: Whether the handling unit is stackable or not.
+              example: true
+
+    Quantity:
+      title: Quantity
+      description: Quantitative value that defines the quantity of an accessorial.
+      type: object
+      properties:
+        unitOfMeasure:
+          title: unitOfMeasure
+          type: string
+          description: Unit of measure. Allowed values - Pounds, Kilograms, Flat, Days, Hours, Minutes, Pieces, Miles, Kilometers, Percent, etc.
+          example: MINUTES
+        value:
+          title: value
+          type: number
+          format: double
+          example: 61
+
+    Weight:
+      title: Weight
+      type: object
+      description: Physical weight of a product or shipment.
+      required: [ unitOfMeasure, value ]
+      properties:
+        unitOfMeasure:
+          type: string
+          description: Weight unit of measure. Allowed values - Pounds, Kilograms, etc.
+          enum: [ Pounds, Kilograms ]
+          example: Pounds
+        value:
+          type: number
+          description: Weight value in given units.
+          format: double
+          example: 100.00
+
+    Dimension:
+      title: Dimension
+      type: object
+      description: Physical dimensions of the product in terms length, width and height.
+      properties:
+        length:
+          $ref: '#/components/schemas/Length'
+        width:
+          $ref: '#/components/schemas/Width'
+        height:
+          $ref: '#/components/schemas/Height'
+      example:
+        unitOfMeasure: Inches
+        value: 100
+
+    Length:
+      title: Length
+      description: Physical length of a product.
+      required: [ unitOfMeasure, value ]
+      properties:
+        unitOfMeasure:
+          type: string
+          description: Length unit of measure. Allowed values - Inches, etc.
+          example: "Inches"
+        value:
+          title: Double
+          type: number
+          format: double
+      example:
+        unitOfMeasure: Inches
+        value: 100
+
+    Width:
+      title: Width
+      description: Physical width of a product.
+      required: [ unitOfMeasure, value ]
+      properties:
+        unitOfMeasure:
+          type: string
+          description: Width unit of measure. Allowed values - Inches, etc.
+          example: "Inches"
+        value:
+          title: Double
+          type: number
+          format: double
+      example:
+        unitOfMeasure: Inches
+        value: 100
+
+    Height:
+      title: Height
+      description: Physical height of a product.
+      required: [ unitOfMeasure, value ]
+      properties:
+        unitOfMeasure:
+          type: string
+          description: Height unit of measure. Allowed values - Inches, etc.
+          example: "Inches"
+        value:
+          title: Double
+          type: number
+          format: double
+      example:
+        unitOfMeasure: Inches
+        value: 100
+
+    Attribute:
+      title: Attribute
+      type: object
+      description: |
+        You can use this object to attach attributes to invoice.
+        This can be used to store additional information that is not part of the standard schema.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the attribute.
+          example: 123456
+        type:
+          type: string
+          description: Type of the attribute.
+          example: "requestNumber"
+        value:
+          type: string
+          description: Value of the attribute.
+          example: "533P5WL"
+
+    MonetaryAmount:
+      title: Monetary Amount
+      type: object
+      description: A monetary value.
+      properties:
+        currencyCode:
+          type: string
+          description: Three-letter [ISO 4217](https://en.wikipedia.org/wiki/ISO_4217) currency code.
+          minLength: 3
+          maxLength: 3
+          example: "USD"
+        value:
+          type: string
+          description: |
+            The value, which can be anything from:
+            * An integer. For currencies that are not typically fractional, such as `JPY`.
+            * A three-place decimal fraction. For currencies that are subdivided into thousandths, such as `TND`.
+            * An eight-place decimal fraction. For currencies such as Bitcoin.
+            * For the required number of decimal places for a currency code, see ISO 4217.
+            * Used in accessorial charges published as passthru and to override accessorial calculation.
+          maxLength: 32
+          pattern: '^((-?[0-9]+)|(-?([0-9]+)?[.][0-9]+))$'
+          example: "10.00"
+
+    PostalAddress:
+      title: Postal Address
+      type: object
+      description: Postal Address. Location code supersedes location details. For location details, the combination of city, state,             postal code and country should be valid.
+      properties:
+        streetAddress:
+          description: address (eg. number, street, etc.).
+          type: string
+          example: "615 J B Hunt Corporate Dr"
+        adminArea1:
+          description: Province, state, or [ISO-3166-2](https://en.wikipedia.org/wiki/ISO_3166-2) subdivision. Required if locationCode is not passed.
+          type: string
+          example: "AR"
+        adminArea2:
+          description: Subdivision smaller than `adminArea1`. In the United States, this refers to county.
+          type: string
+          example: "Benton"
+        locality:
+          description: City or town. Required if locationCode is not passed.
+          type: string
+          example: "Lowell"
+        neighborhood:
+          description: The smallest administrative division associated with an address,
+            typically, a neighborhood or a section of a larger populated place.
+            A neighborhood is a subdivision of a city. Currently does not impact Rating
+          type: string
+        postalCode:
+          description: ZIP, postcode, or postal code. Required if locationCode is not passed.
+          type: string
+          example: "72745"
+        postalExt:
+          description: A postal code extension, such as the United States Postal Service
+            ZIP+4 code, provides finer resolution or higher accuracy when also
+            passing postal.
+          type: string
+          example: "1234"
+        countryCode:
+          type: string
+          description: '[ISO 3166-1 alpha-3](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3) country code. Required if locationCode is not passed.'
+          minLength: 3
+          maxLength: 3
+          pattern: ^[A-Z]{3}$
+          example: "USA"
+        locationCode:
+          title: locationCode
+          description: Code used to reference the location. Required if adminArea1, locality, postalCode and countryCode is not passed. Supersedes the combination of city, state, postal code, and country
+          type: string
+          example: ABC123
+
+    DocumentIdentifiers:
+      title: Document Identifiers
+      description: Identifiers for a supporting document.
+      type: object
+      properties:
+        invoiceNumber:
+          type: string
+          description: Unique identifier for the document.
+        DOT:
+          type: string
+          description: Department of Transportation identifier
+        MC:
+          type: string
+          description: Motor Carrier Identifier
+
+    DocumentRequest:
+      description: |
+        Request object for uploading an supporting document. This includes all necessary identifiers and optional 
+        information to ensure proper tracking and processing of the document.
+      type: object
+      required: [ uniqueID, shipmentID, DOT, MC, invoiceNumber, invoiceDate, documents ]
+      properties:
+        uniqueID:
+          type: string
+        shipmentID:
+          type: string
+        DOT:
+          type: string
+        MC:
+          type: string
+        invoiceNumber:
+          type: string
+        invoiceDate:
+          type: string
+          format: date
+        documentSource:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        documents:
+          type: array
+          items:
+            type: object
+            required: [ documentType, files ]
+            properties:
+              documentType:
+                $ref: '#/components/schemas/DocumentType'
+              files:
+                type: array
+                items:
+                  type: string
+                  format: binary
+                  description: Array of files for this document type (PDF, TIF, JPEG, PNG, max 25 MB each)
+
+    DocumentResponse:
+      description: |
+        Response object for retrieving an invoice and supporting document. This includes all necessary identifiers and optional 
+        information to ensure proper retrieval of the document.
+      type: object
+      required: [ uniqueID, shipmentID, DOT, MC, invoiceNumber, invoiceDate, documents ]
+      properties:
+        uniqueID:
+          type: string
+        shipmentID:
+          type: string
+        DOT:
+          type: string
+        MC:
+          type: string
+        invoiceNumber:
+          type: string
+        invoiceDate:
+          type: string
+          format: date
+        documentSource:
+          type: string
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        documents:
+          type: array
+          items:
+            type: object
+            required: [ documentType, files ]
+            properties:
+              documentType:
+                $ref: '#/components/schemas/DocumentType'
+              files:
+                type: array
+                items:
+                  type: object
+                  required: [ id, content ]
+                  properties:
+                    id:
+                      type: string
+                      description: Unique identifier for the file.
+                      example: "file-12345"
+                    content:
+                      type: string
+                      format: binary
+                      description: File content (PDF, TIF, JPEG, PNG, max 25 MB each)
+
+    DocumentType:
+      type: string
+      description: |
+        - The type of document being sent. This can be one of the predefined types such as Invoice, Bill of Lading, etc.
+        - The list of document types is defined in the API documentation.
+      oneOf:
+        - const: "BOL"
+          description: Bill of Lading Document Type
+        - const: "CAT"
+          description: Catalog Page Document Type
+        - const: "COMM"
+          description: Communications & Correspondence Document Type
+        - const: "CON"
+          description: Contract Document Type
+        - const: "RULE"
+          description: Customer Specific Rules Tariff Document Type
+        - const: "DIM"
+          description: Dimension Certificate Document Type
+        - const: "DTR"
+          description: Detention Receipt Document Type
+        - const: "DIS"
+          description: Discount Matrix Document Type
+        - const: "FRB"
+          description: Freight Bill Document Type
+        - const: "FUEL"
+          description: Fuel Tables Document Type
+        - const: "INV"
+          description: Invoice Document Type
+        - const: "INSP"
+          description: Inspection Certificate Document Type
+        - const: "LOA"
+          description: Letter of Authority Document Type
+        - const: "LPR"
+          description: Lumper Receipt Document Type
+        - const: "MSDS"
+          description: Material Safety Data Sheet Document Type
+        - const: "PAC"
+          description: Packing Slip Document Type
+        - const: "IMG"
+          description: Photos Document Type
+        - const: "POD"
+          description: Proof of Delivery Document Type
+        - const: "QUO"
+          description: Quote Document Type
+        - const: "RESI"
+          description: Residential Dispute Support Document Type
+        - const: "SPEC"
+          description: Spec Sheet Document Type
+        - const: "SCL"
+          description: Scale Document Type
+        - const: "STB"
+          description: Statement Bill Document Type
+        - const: "W&I"
+          description: Weight & Inspection Certificate Document Type
+        - const: "OTHER"
+          description: Other Document Type
+      example: BOL

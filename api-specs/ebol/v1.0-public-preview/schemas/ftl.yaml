@@ -1,0 +1,1924 @@
+openapi: 3.1.0
+info:
+  title: FTL Schema Definitions
+  version: 1.0.0-TL
+  description: >-
+    This file contains the schema definitions for the Full Truckload (FTL) Bill of Lading (BOL) API.
+components:
+  schemas:
+    BOL_Request:
+      title: FTL BOL Request
+      description: >-
+        The request object for creating or updating an Electronic Bill of Lading.
+      type: object
+      required:
+        - bol
+        - commodities
+        - payment
+        - origin
+        - destination
+        - billTo
+      properties:
+        bol:
+          $ref: '#/components/schemas/BOL_Header'
+        images:
+          $ref: '#/components/schemas/Images'
+        notifications:
+          $ref: '#/components/schemas/Notifications'
+        referenceNumbers:
+          $ref: '#/components/schemas/ReferenceNumbers'
+        payment:
+          $ref: '#/components/schemas/Payment'
+        commodities:
+          $ref: '#/components/schemas/Commodities'
+        shipmentTotals:
+          $ref: '#/components/schemas/Shipment_Totals'
+        accessorials:
+          $ref: '#/components/schemas/Accessorials'
+        origin:
+          $ref: '#/components/schemas/Origin'
+        destination:
+          $ref: '#/components/schemas/Destination'
+        billTo:
+          $ref: '#/components/schemas/BillTo'
+        customsBroker:
+          $ref: '#/components/schemas/CustomsBroker'
+        specialInstructions:
+          type: string
+          examples:
+            - Gate code 123 to enter complex
+          description: >-
+            Special delivery instructions that need to be followed for the
+            shipment's delivery.
+    BOL_Response:
+      title: FTL BOL Response
+      type: object
+      properties:
+        transactionDate:
+          type: string
+          format: date
+          description: The date associated with this electronic bill of lading transaction.
+        referenceNumbers:
+          allOf:
+            - type: object
+              properties:
+                shipmentConfirmationNumber:
+                  type: string
+                  examples:
+                    - SCN1234
+                  description: >-
+                    Number provided by the carrier to acknowledge they accepted the
+                    BOL.
+            - $ref: '#/components/schemas/ReferenceNumbers'
+        scac:
+          type: string
+          examples:
+            - AAAB
+          description: >-
+            4-letter, Standard Carrier Alpha Code, returned by the carrier.
+        images:
+          type: object
+          properties:
+            bol:
+              type: string
+              description: Base 64 encoded PDF of the populated Bill Of Lading.  Any bar code within the image(s) should include the check digit when applicable.
+              examples:
+                - JVBERi0xLjcKCjQgMCBvYmoKPDwKL0JpdHNQZXJDb21wb25lbnQgOAovQ29sb3JTcGFjZSAvRGV2a......
+            shippingLabels:
+              type: string
+              description: Base 64 encoded PDF of the populated shipping Labels.  Any bar code within the image(s) should include the check digit when applicable.
+              examples:
+                - JVBERi0xLjcKCjQgMCBvYmoKPDwKL0JpdHNQZXJDb21wb25lbnQgOAovQ29sb3JTcGFjZSAvRGV2a......
+        termsAndConditions:
+              type: string
+              examples:
+                - Terms and Conditions text available for download at www.myurl-nmfta.org
+              description: >-
+                Add terms and conditions here if desired, or a link to your 
+                terms and conditions.    
+        messageStatus:
+          type: object
+          description: Object containing message status details.
+          properties:
+            status:
+              type: string
+              description: |
+                Indicates the status of the request. <br><br>
+                PASS - Request is successful with no exceptions.<br>
+                FAIL - Request is unsuccessful due to some exception.<br>
+                WARNING - Request is successful with some exception.
+              enum:
+                - PASS
+                - FAIL
+                - WARNING
+            code:
+              type: string
+              description: Indicates response detail code.
+              examples:
+                - '10000000'
+            message:
+              type: string
+              description: Provides information pertaining to the response code.
+              examples:
+                - Transaction was successful.
+            resolution:
+              type: string
+              description: Provides guidance pertaining to the response code.
+            information:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  type:
+                    type: string
+                  message:
+                    type: string
+        resultStatusCodes:
+          description: Error response
+          type: array
+          items:
+            $ref: '#/components/schemas/Result_Status_Codes' 
+    BOL_Header:
+      title: BOL Header
+      type: object
+      required:
+        - requestedPickupDate
+        - isTest
+        - requestorRole
+      properties:
+        requestedPickupDate:
+          type: string
+          format: date
+          description: |
+            The intended Ship Date. NOTE this does not serve as a Pickup Request
+        isTest:
+          type: boolean
+          description: >-
+            Indicates whether or not the submitted request is intended to be
+            a test or not.
+        requestorRole:
+          description: |
+            Identifies the party making the request.
+
+            See the Requestor Roles schema for valid value descriptions.
+          $ref: '#/components/schemas/Requestor_Roles'
+    Images:
+      title: Images
+      type: object
+      properties:
+        includeBol:
+          type: boolean
+          description: >
+            Indicates whether or not you want an image of the populated BOL
+            returned in the response.
+          default: false
+        includeShippingLabels:
+          type: boolean
+          description: >
+            Indicates whether or not you want image(s) of the shipping
+            labels returned in the response.
+          default: false
+        shippingLabels:
+          type: object
+          properties:
+            format:
+              description: >
+                Specifies the printer format type for the labels.
+
+                Required when images.includeShippingLabels is true.
+
+                See the Shipping Label Formats schema for valid value descriptions.
+              $ref: '#/components/schemas/Shipping_Label_Formats'
+            quantity:
+              type: integer
+              description: |
+                Specifies the quantity of pages desired. 
+
+                Required when images.includeShippingLabels is true.
+              examples:
+                - 5
+            position:
+              type: integer
+              description: |
+                Specifies the starting position for the shipping labels.
+
+                Required when images.shippingLabel is Avery.
+              minimum: 1
+              maximum: 6
+        email:
+          type: object
+          properties:
+            includeBol:
+              type: boolean
+              description: >
+                Used to request the bill of lading PDF to be sent to one or
+                more email addresses
+            includeLabels:
+              type: boolean
+              description: >
+                Used to request the shipping labels PDF to be sent to one or
+                more email addresses
+            addresses:
+              type: array
+              description: >
+                Provide one or more email addresses to receive the bol
+                and/or shipping labels PDF
+              items:
+                type: string
+                format: email
+    Notifications:
+      title: Notifications
+      type: array
+      description: >-
+        include if you want notifications of shipment movements by text
+        message or email
+      items:
+        type: object
+        properties:
+          phoneNumber:
+            type: string
+            description: |
+              Phone number of contact for updates about shipment movements
+              
+              Valid Formats:
+              * ########## (10 digits - Area code + phone)
+            examples:
+              - '8881234567'
+            pattern: '^\d{10}$'
+          email:
+            type: string
+            format: email
+            description: Email address of contact for updates about shipment movements
+    ReferenceNumbers:
+      title: Reference Numbers
+      type: object
+      properties:
+        pro:
+          type: string
+          description: >-
+            Shipper's pre-assigned PRO number for the requested carrier. If one was not provided in the request, one will be auto assigned by the carrier.  The PRO number value should include the check digit when applicable.
+          examples:
+            - 123456-7
+        quoteId:
+          type: string
+          description: >-
+            Quote (estimate) number provided by the carrier after submitting
+            a rate quote request.
+          examples:
+            - E556724
+        shipmentId:
+          type: string
+          description: Shipment Id (SID) number for the shipment.
+          examples:
+            - SID9743985
+        masterBol:
+          type: string
+          description: Master Bill of Lading number for the shipment.
+          examples:
+            - MBL98472587
+        trailerId:
+          type: string
+          description: >-
+            When passed, indicates that the shipment is associated to a specific, spotted trailer.
+        manifestId:
+          type: string
+          description: >-
+            When passed, indicates that the shipment is associated to a manifest that includes multiple shipments, possibly across multiple spotted trailers.
+        bol:
+          type: array
+          items:
+            type: string
+            examples:
+              - BL19498432
+              - BL99744565
+        po:
+          type: array
+          items:
+            type: object
+            properties:
+              number:
+                type: string
+                examples:
+                  - '554238'
+                description: The Purchase Order number.
+              pieces:
+                type: integer
+                examples:
+                  - 5
+                description: Total pieces associated with the Purchase Order
+              weight:
+                type: integer
+                examples:
+                  - 150
+                description: Total weight associated with the Purchase Order
+              weightUnit:
+                $ref: '#/components/schemas/Weight_Unit'
+              palletized:
+                type: boolean
+                description: >-
+                  Indicates whether or not the pieces associated with the
+                  purchase order are on a pallet/slip/skid or not.
+              additionalShipperInfo:
+                type: string
+                examples:
+                  - Freight must always stay upright
+                description: Additional information from shipper per line item
+        additionalReferences:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                examples:
+                  - Customer Reference Id
+                description: |
+                  Indicates the name of the reference number being provided.
+              value:
+                type: string
+                examples:
+                  - CRID3452-01
+                description: >-
+                  Additional reference number that correlates to the
+                  additional reference name.
+    Payment:
+      title: Payment
+      type: object
+      required:
+        - terms
+      properties:
+        terms:
+          description: |
+            Freight Billing Terms for the Shipment
+
+            See the Payment Terms schema for valid value descriptions.
+          $ref: '#/components/schemas/Payment_Terms'
+    Commodities:
+      title: Commodities
+      type: object
+      required:
+        - lineItemLayout
+        - handlingUnits
+        - lineItems
+      properties:
+        lineItemLayout:
+          type: string
+          enum:
+            - Nested
+            - Stacked
+          description: |
+            Nested: Indicates if the Handling Unit/Line Item relationship is
+            known. If this value is used, each Line Item associated to a
+            Handling Unit is conditionally required to be passed within that
+            Handling Unit's object.
+
+            Stacked: Indicates if the Handling Unit/Line Item relationship
+            is not known.  If this value is used, Line Items may passed
+            within any Handling Unit object.
+        handlingUnits:
+          type: array
+          items:
+            type: object
+            required:
+              - count
+              - type
+              - weight
+            properties:
+              count:
+                type: integer
+                examples:
+                  - 2
+                description: Number of handling units being described
+              type:
+                description: |
+                  Type of the handling units being described
+
+                  See the Handling Unit Types schema for valid value descriptions.
+                $ref: '#/components/schemas/Handling_Unit_Types'
+              tareWeight:
+                type: integer
+                examples:
+                  - 5
+                description: Weight of the skids/pallets/slips used in the shipment.
+              weight:
+                type: integer
+                description: Total weight for the specified handling units.
+                examples:
+                  - 1500
+              weightUnit:
+                $ref: '#/components/schemas/Weight_Unit'
+              length:
+                type: integer
+                examples:
+                  - 48
+                description: The length of the handling units being described.
+              width:
+                type: integer
+                examples:
+                  - 48
+                description: The width of the handling units being described.
+              height:
+                type: integer
+                examples:
+                  - 48
+                description: The height of the handling units being described.
+              dimensionsUnit:
+                $ref: '#/components/schemas/Dimensions_Unit'
+              stackable:
+                type: boolean
+                description: |
+                  Identifies whether or not the freight being described can be stacked on one another.
+                default: false
+              lineItems:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - weight
+                    - description
+                    - hazardous
+                    - stackable
+                    - pieces
+                    - packagingType
+                  properties:
+                    description:
+                      type: string
+                      examples:
+                        - Small frameless mirrors
+                      description: Description of the freight being described.
+                    weight:
+                      type: integer
+                      examples:
+                        - 1500
+                      description: Total weight for the specified lineItem.
+                    weightUnit:
+                      $ref: '#/components/schemas/Weight_Unit'
+                    pieces:
+                      type: integer
+                      examples:
+                        - 3
+                      description: >-
+                        Number of individual pieces for the line item being
+                        described.
+                    packagingType:
+                      description: |
+                        Packaging type for the individual pieces of the line item being described.
+
+                        See the Packaging Types schema for valid value descriptions.
+                      $ref: '#/components/schemas/Packaging_Types'
+                    classification:
+                      description: |
+                        Classification of the line item being described.
+
+                        See the Classification Codes schema for valid value descriptions.
+                      $ref: '#/components/schemas/Classification_Codes'
+                    nmfc:
+                      type: string
+                      description: NMFC code of the freight being described.
+                      examples:
+                        - '86900'
+                    nmfcSub:
+                      type: string
+                      description: >-
+                        The Sub value for the NMFC of the freight being
+                        described.
+                      examples:
+                        - '3'
+                    hazardous:
+                      type: boolean
+                      description: >-
+                        Identifies whether or not the freight being
+                        described contains hazardous materials.
+                    hazardousDescription:
+                      type: string
+                      examples:
+                        - UN 1090, Acetone, 3, PG II
+                      description: >-
+                        Conditionally required when 'hazardous' is 'true'.
+                        Provides a detailed description of the hazardous
+                        item.
+                    hazardousDetails:
+                      type: object
+                      properties:
+                        weight:
+                          type: integer
+                          examples:
+                            - 45
+                          description: >-
+                            Total weight of hazardous material coveraged by
+                            one description.
+                        weightUnit:
+                          $ref: '#/components/schemas/Weight_Unit'
+                        class:
+                          type: string
+                          examples:
+                            - 3
+                          description: >-
+                            Class that the hazardous material is catogorized
+                            by.
+                        unnaNumber:
+                          type: string
+                          examples:
+                            - UN1234
+                          description: >-
+                            Proper Identification Number (UN or NA)
+                            corresponding to the Proper Shipping Name
+                        propername:
+                          type: string
+                          examples:
+                            - Anhydrous ammonia
+                          description: |
+                            Proper shipping name for the hazardous material.
+
+                            From DOT regulations 172.101
+                        technicalName:
+                          type: string
+                          examples:
+                            - NH3
+                          description: >
+                            Technical name for the hazardous material. Not
+                            all hazardous items will have a technical name.
+
+                            From DOT regulations 172.101
+                        packingGroup:
+                          type: string
+                          examples:
+                            - '2'
+                          description: >-
+                            Hazmat Packing Group number. Not all hazmat
+                            items have a packing group
+                        contractNumber:
+                          type: string
+                          examples:
+                            - '54321'
+                          description: >-
+                            The contract number with the hazardous materials
+                            contact
+    Shipment_Totals:
+      title: Shipment Totals
+      type: object
+      properties:
+        grossWeight:
+          type: integer
+          examples:
+            - 2000
+          description: >-
+            Total weight of the entire shipment, including handling units
+            (tare weight).
+        netWeight:
+          type: integer
+          examples:
+            - 1993
+          description: >-
+            Total weight of the entire shipment, not including handling
+            units (tare weight).
+        weightUnit:
+          $ref: '#/components/schemas/Weight_Unit'
+        handlingUnits:
+          type: integer
+          examples:
+            - 2
+          description: Handling unit count for the entire shipment
+        linearLength:
+          type: integer
+          description: Linear length for the entire shipment
+          examples:
+            - 576
+        linearWidth:
+          type: integer
+          description: Linear width for the entire shipment
+          examples:
+            - 102
+        linearHeight:
+          type: integer
+          description: Linear height for the entire shipment
+          examples:
+            - 60
+        dimensionsUnit:
+          $ref: '#/components/schemas/Dimensions_Unit'
+        cube:
+          type: integer
+          examples:
+            - 128
+          description: >-
+            Cubic volume of the entire shipment (total length X total width
+            X total height).
+        cubeDimensionsUnit:
+          type: string
+          enum:
+            - Feet
+            - Meters
+          default: Feet
+          description: |
+            The unit of measurement for cubic dimensions.
+        declaredValue:
+          type: integer
+          examples:
+            - 7
+          description: >-
+            Total monetary value of the shipment in USD (sometimes needed
+            for cross-border moves).
+        currency:
+          description: |
+            Optional attribute to indicate currency of declaredValue.
+          $ref: '#/components/schemas/Currencies'
+    Accessorials:
+      title: Accessorials
+      type: object
+      properties:
+        codes:
+          type: array
+          description: |
+            An array to hold the list of services requested for the shipment
+          items:
+            $ref: '#/components/schemas/Accessorial_Codes'
+        hazardousDetails:
+          type: object
+          description: >
+            Required if accessorial codes list contains HAZ and/or if any
+            commodity line item's hazardous flag is set to true.
+          properties:
+            emergencyContact:
+              type: object
+              properties:
+                name:
+                  type: string
+                  examples:
+                    - Manny Delgato
+                  description: >-
+                    Full name of who should be contacted in the case of a
+                    hazardous materials-related issue.
+                phone:
+                  type: string
+                  examples:
+                    - '7775558899'
+                  pattern: '^\d{10}$'
+                  description: |
+                    Phone number of who should be contacted in the case of a hazardous materials-related issue.
+
+                    Valid Formats:
+                    * ########## (10 digits - Area code + phone)
+        cod:
+          type: object
+          description: >
+            Required when accessorial code COD (Collect on delivery) is present in the
+            accessorial.codes list. 
+          properties:
+            amount:
+              type: number
+              format: double
+              description: |
+                Amount to be received for the COD.
+            currency:
+              description: |
+                Optional attribute to indicate currency of COD. Defaults to USD.
+              $ref: '#/components/schemas/Currencies'
+            terms:
+              type: string
+              enum:
+                - Prepaid
+                - Collect
+              description: |
+                Payment terms associated with the COD (Collect on delivery).
+            customerCheckAcceptable:
+              type: boolean
+              description: >-
+                Indicates whether or not a customer check or cash is
+                acceptable.
+            remitTo:
+              description: >
+                Required when accessorial code COD (Collect on delivery) is present in the
+                accessorial.codes list. 
+              $ref: '#/components/schemas/AddressInformation'
+        sortAndSegregateDetails:
+          type: object
+          description: >
+            Required when accessorial code SRT is present in the
+            accessorial.codes list. 
+          properties:
+            pieces:
+              type: integer
+              description: Number of pieces in a shipment to be sorted/segregated
+              examples:
+                - 25
+        fullValueCoverageDetails:
+          type: object
+          description: >
+            Required when accessorial code FVC is present in the
+            accessorial.codes list. 
+          properties:
+            monetaryValue:
+              type: number
+              format: double
+              description: |
+                Value of the cargo.
+            currency:
+              description: |
+                Optional attribute to indicate currency of monetaryValue.
+              $ref: '#/components/schemas/Currencies'
+        markDetails:
+          type: object
+          description: >
+            Required when accessorial code MARK is present in the
+            accessorial.codes list.
+          properties:
+            pieces:
+              type: integer
+              description: Number of pieces in a shipment requiring marking or tagging
+              examples:
+                - 25
+        limitedAccessType:
+          type: object
+          description: >
+            Optional attribute to indicate the limited access type when
+            accessorial code LTDAP or LTDAD is present in the
+            accessorial.codes list.
+          properties:
+            origin:
+              description: >
+                Optional attribute to indicate the limited access type when
+                accessorial code LTDAP is present in the accessorial.codes
+                list.
+
+                See the Limited Access Types schema for valid value descriptions.
+              $ref: '#/components/schemas/Limited_Access_Types'
+            destination:
+              description: >
+                Optional attribute to indicate the limited access type when
+                accessorial code LTDAD is present in the accessorial.codes
+                list.
+
+                See the Limited Access Types schema for valid value descriptions.
+              $ref: '#/components/schemas/Limited_Access_Types'
+        timeCriticalDetails:
+          type: object
+          properties:
+            type:
+              description: >
+                Type of delivery required for the requested Time Critical
+                Service.
+
+                Required when accessorials.code list include TCS.
+
+                See the Time Critical Types schema for valid value descriptions.
+              $ref: '#/components/schemas/Time_Critical_Types'
+            date:
+              type: object
+              properties:
+                start:
+                  type: string
+                  format: date-time
+                  description: >
+                    The date (with or without time) the shipment is
+                    requested to be delivered.
+
+
+                    Required when timeCriticalDetails.type is populated with
+                    any valid value.
+                end:
+                  type: string
+                  format: date-time
+                  description: >
+                    The end date (with or without time) of the requested
+                    delivery window.
+
+
+                    Required when the timeCriticalDetails.type is Delivery
+                    Window.
+        appointmentDetails:
+          type: object
+          properties:
+            pickup:
+              type: object
+              properties:
+                start:
+                  type: string
+                  format: date-time
+                  description: >
+                    Starting appointment date (with or without time) the
+                    shipment is requested to be picked up.
+
+
+                    Required when accessorials.code list include APTP.
+                end:
+                  type: string
+                  format: date-time
+                  description: >
+                    Ending appointment date (with or without time) the
+                    shipment is requested to be picked up.
+            delivery:
+              type: object
+              properties:
+                start:
+                  type: string
+                  format: date-time
+                  description: >
+                    Starting appointment date (with or without time) the
+                    shipment is requested to be delivered.
+
+
+                    Required when accessorials.code list include APTD.
+                end:
+                  type: string
+                  format: date-time
+                  description: >
+                    Ending appointment date (with or without time) the
+                    shipment is requested to be delivered.
+    Origin:
+      title: Origin
+      allOf:
+        - type: object
+          properties:
+            account:
+              type: string
+              description: Company's account number/id for the origin.
+              examples:
+                - '12345'
+            locationId:
+              type: string
+              description: Company's location id for the origin
+              examples:
+                - '808'
+          required:
+            - name
+            - address1
+            - city
+            - stateProvince
+            - postalCode
+            - country
+            - contact
+        - $ref: '#/components/schemas/ContactInformation'
+    Destination:
+      title: Destination
+      allOf:
+        - type: object
+          properties:
+            account:
+              type: string
+              description: Company's account number/id for the destination.
+              examples:
+                - '12345'
+            locationId:
+              type: string
+              description: Company's location id for the destination
+              examples:
+                - '808'
+          required:
+            - name
+            - address1
+            - city
+            - stateProvince
+            - postalCode
+            - country
+            - contact
+        - $ref: '#/components/schemas/ContactInformation'
+    BillTo:
+      title: Bill To
+      allOf:
+        - type: object
+          properties:
+            account:
+              type: string
+              description: Company's account number/id for the billTo.
+              examples:
+                - '12345'
+            locationId:
+              type: string
+              description: Company's location id for the billTo.
+              examples:
+                - '808'
+          required:
+            - name
+            - address1
+            - city
+            - stateProvince
+            - postalCode
+            - country
+            - contact
+        - $ref: '#/components/schemas/ContactInformation'
+    CustomsBroker:
+      title: Customs Broker
+      type: object
+      properties:
+        type:
+          type: string
+          examples:
+            - Import
+          description: >
+            Used to identify a customs broker that is involved in a
+            cross-border freight move.
+
+
+            Valid Values: Import or Export
+              * Import: customs broker handling the destination-side of the cross-border freight move
+              * Export: customs broker handling the origin-side of the cross-border freight move
+      allOf:
+        - type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - Import
+                - Export
+              description: >
+                Used to identify a customs broker that is involved in a
+                cross-border freight move.
+
+
+                Valid Values: Import or Export
+                  * Import: customs broker handling the destination-side of the cross-border freight move
+                  * Export: customs broker handling the origin-side of the cross-border freight move
+        - $ref: '#/components/schemas/ContactInformation'  
+    Weight_Unit:
+      title: Weight Unit
+      type: string
+      enum:
+        - Pounds
+        - Kilograms
+      default: Pounds
+      description: |
+        The unit of measurement for weight.
+    Dimensions_Unit:
+      title: Dimensions Unit
+      type: string
+      enum:
+        - Inches
+        - Centimeters
+      default: Inches
+      description: |
+        The unit of measurement for dimensions.
+    AddressInformation:
+      title: Address Information
+      type: object
+      properties:
+        name:
+          type: string
+          description: Company name.
+          examples:
+            - Closets Closets Closets
+        address1:
+          type: string
+          description: Primary Address line
+          examples:
+            - 12 S. Closets Place
+        address2:
+          type: string
+          description: Secondary Address line
+          examples:
+            - ste 3
+        city:
+          type: string
+          description: City Name
+          examples:
+            - Los Angeles
+        stateProvince:
+          $ref: '#/components/schemas/State_Province_Codes'
+        postalCode:
+          type: string
+          examples:
+            - '90001'
+          description: >
+            The 5-digit + 4 or 5-digit for the United States, 5-digit for Mexico, or 6-character for Canada, postal code
+
+            Valid formats:
+              * 12345-1234 (5 digits + 4 - USA)
+              * 12345 (5 digits - USA/MEX)
+              * A1A1A1 (6 characters - CAN)
+              * A1A1A (5 characters - CAN)
+        country:
+          $ref: '#/components/schemas/Country_Codes'
+    ContactInformation:
+      title: Contact Information
+      allOf:
+        - $ref: '#/components/schemas/AddressInformation'
+        - type: object
+          properties:
+            contact:
+              type: object
+              description: |
+                Object containing contact details
+              required:
+                - phone
+              properties:
+                phone:
+                  type: string
+                  examples:
+                    - '5552226666'
+                  pattern: '^\d{10}$'
+                  description: >
+                    Ten digit phone number, without country code and/or dashes
+
+                    Valid Formats:
+                    * ########## (10 digits - Area code + phone)
+                phoneExt:
+                  type: string
+                  examples:
+                    - '99'
+                  description: Phone extension
+                name:
+                  type: string
+                  examples:
+                    - Jay Pritchett
+                  description: Name of the contact person.
+                email:
+                  type: string
+                  format: email
+                  description: Email address of the contact person.
+    Accessorial_Codes:
+      title: Accessorial Codes
+      type: string
+      description: |
+        Valid values:
+        * APTD - Appointment required at delivery
+        * APTP - Appointment required at pickup
+        * COD - Collect on delivery
+        * EXPD - Expedited Service
+        * FVC - Full value coverage
+        * GTD_AM- Guaranteed service - by Morning
+        * GTD_NOON- Guaranteed service - by Noon
+        * GTD_PM- Guaranteed service - by End of Day
+        * HAZ - Hazardous material
+        * IDL - Inside delivery
+        * INBD - In bond shipment
+        * IPU - Inside pickup
+        * LFTD - Lift gate required at delivery
+        * LFTP - Lift gate required at pickup
+        * LTDAD - Limited access delivery
+        * LTDAP - Limited access pickup
+        * MARK - Marked or tagged
+        * MNC - Must notify consignee
+        * OVR - Over dimension/excessive length
+        * PPD - Perishables (food)
+        * PSC - Protective from cold
+        * PSH - Protective from heat
+        * PSN - Poisonous material
+        * REP - Residential pickup
+        * RES - Residential delivery
+        * SRT - Sort and segregate
+        * SS - Single Shipment
+        * TCS - Time Crititcal Service
+      enum:
+        - APTD
+        - APTP
+        - COD
+        - EXPD
+        - FVC
+        - GTD_AM
+        - GTD_NOON
+        - GTD_PM
+        - HAZ
+        - IDL
+        - INBD
+        - IPU
+        - LFTD
+        - LFTP
+        - LTDAD
+        - LTDAP
+        - MARK
+        - MNC
+        - OVR
+        - PPD
+        - PSC
+        - PSH
+        - PSN
+        - REP
+        - RES
+        - SRT
+        - SS
+        - TCS
+    Classification_Codes:
+      title: Classification Codes
+      type: string
+      description: |
+        Valid values:
+        * 50
+        * 55
+        * 60
+        * 65
+        * 70
+        * 77.5
+        * 85
+        * 92.5
+        * 100
+        * 110
+        * 125
+        * 150
+        * 175
+        * 200
+        * 250
+        * 300
+        * 400
+        * 500
+        * Not required
+      enum:
+        - '50'
+        - '55'
+        - '60'
+        - '65'
+        - '70'
+        - '77.5'
+        - '85'
+        - '92.5'
+        - '100'
+        - '110'
+        - '125'
+        - '150'
+        - '175'
+        - '200'
+        - '250'
+        - '300'
+        - '400'
+        - '500'
+        - 'Not required'
+    Country_Codes:
+      title: Country Codes
+      type: string
+      description: |
+        Three letter country code
+
+        Valid values:
+        * CAN - Canada
+        * USA - United States
+        * MEX - Mexico
+      enum:
+        - CAN
+        - USA
+        - MEX
+    Currencies:
+      title: Currencies
+      type: string
+      description: |
+        Valid values:
+        * CAD
+        * MXN
+        * USD
+      enum:
+        - CAD
+        - MXN
+        - USD
+      default: USD
+    Handling_Unit_Types:
+      title: Handling Unit Types
+      type: string
+      description: |
+        Valid values:
+        * BAG - Bag
+        * BAL - Bale
+        * BBL - Barrel
+        * BSK - Basket
+        * BIN - Bin
+        * BOX - Box
+        * BXT - Bucket
+        * BCH - Bunch
+        * BDL - Bundle
+        * CAB - Cabinet
+        * CAG - Cage
+        * CAN - Can
+        * CBY - Carboy
+        * CAR - Carrier
+        * CTN - Carton
+        * CAS - Case
+        * CSK - Cask
+        * CHS - Chest
+        * COL - Coil
+        * CNT - Container
+        * COR - Cores
+        * CRT - Crate
+        * CYL - Cylinder
+        * DRM - Drum
+        * DBK - Dry Bulk
+        * ENV - Envelope
+        * FIR - Firkin
+        * GLD - Gaylord
+        * HPR - Hamper
+        * HGH - Hogshead
+        * HRB - On Hanger or Rack in Boxes
+        * INT - Intermediate Bulk Container
+        * JAR - Jar
+        * JCN - Jerrycan
+        * KEG - Keg
+        * KIT - Kit
+        * LIF - Lifts
+        * LBK - Liquid Bulk
+        * LSE - Loose
+        * MXD - Mixed
+        * OTH - Other
+        * PKG - Package
+        * PCK - Packed
+        * PAL - Pail
+        * PAT - Pallet
+        * PCS - Piece
+        * PLN - Pipe Line
+        * RCK - Rack
+        * REL - Reel
+        * ROL - Roll
+        * SKD - Skid
+        * SLP - Slip Sheet
+        * SPL - Spool
+        * TNK - Tank
+        * TBN - Tote
+        * TRY - Tray
+        * TRU - Truckload
+        * TRK - Trunk
+        * TUB - Tub
+        * TBE - Tube
+        * UNT - Unit
+        * VPK - Van Pack
+        * WRP - Wrapped
+      enum:
+        - BAG
+        - BAL
+        - BBL
+        - BSK
+        - BIN
+        - BOX
+        - BXT
+        - BCH
+        - BDL
+        - CAB
+        - CAG
+        - CAN
+        - CBY
+        - CAR
+        - CTN
+        - CAS
+        - CSK
+        - CHS
+        - COL
+        - CNT
+        - COR
+        - CRT
+        - CYL
+        - DRM
+        - DBK
+        - ENV
+        - FIR
+        - GLD
+        - HPR
+        - HGH
+        - HRB
+        - INT
+        - JAR
+        - JCN
+        - KEG
+        - KIT
+        - LIF
+        - LBK
+        - LSE
+        - MXD
+        - OTH
+        - PKG
+        - PCK
+        - PAL
+        - PAT
+        - PCS
+        - PLN
+        - RCK
+        - REL
+        - ROL
+        - SKD
+        - SLP
+        - SPL
+        - TNK
+        - TBN
+        - TRY
+        - TRU
+        - TRK
+        - TUB
+        - TBE
+        - UNT
+        - VPK
+        - WRP
+    Limited_Access_Types:
+      title: Limited Access Types
+      type: string
+      description: |
+        Valid Values:
+        * Airport
+        * Airport-3 - Airport Cargo
+        * Church
+        * Church-55 - Place of Worship
+        * Club
+        * Club-21 - Country Club / Golf Course
+        * Club-60 - Private Club
+        * Construction
+        * Construction-17 - Construction Site
+        * Fair
+        * Fair-27 - Fairgrounds
+        * Farm
+        * Farm-30 - Fruit Orchard
+        * Farm-62 - Pumpkin Patch / Vegetable Patch
+        * Farm-87 - Winery
+        * Hotel
+        * Hotel-14 - Casino
+        * Hotel-35 - Hotel
+        * Hotel-41 - Lodging
+        * Hotel-47 - Motel / Inn
+        * Hotel-54 - Parking Lot / Garage
+        * Hotel-65 - Resort
+        * Hotel-66 - Restaurant / Bar
+        * Mine
+        * Mine-46 - Mine / Quarry
+        * Other
+        * Other-6 - Book Store
+        * Other-7 - Bowling Alley
+        * Other-8 - Brewery
+        * Other-9 - Business Park
+        * Other-12 - Car Rental
+        * Other-13 - Car Wash
+        * Other-19 - Convenience Store
+        * Other-23 - Daycare
+        * Other-24 - Dealership
+        * Other-25 - Distillery
+        * Other-26 - Factory Outlet
+        * Other-28 - Fast Food
+        * Other-31 - Funeral Home
+        * Other-33 - Gym / Fitness Center
+        * Other-38 - Laundry / Dry Cleaner
+        * Other-40 - Liquor Store
+        * Other-42 - Mall
+        * Other-48 - Native American Reservation
+        * Other-52 - Other
+        * Other-67 - Retail Store
+        * Other-68 - Salon / Barber
+        * Other-72 - Shopping Center
+        * Other-75 - Specialty Food Store
+        * Other-78 - Theater
+        * Other-80 - Truck Stop
+        * Other-83 - Vet / Kennel
+        * Park
+        * Park-4 - Amusement Park
+        * Park-5 - Aquarium
+        * Park-10 - Camp
+        * Park-11 - Campground / RV Park
+        * Park-15 - Cemetery
+        * Park-53 - Park
+        * Park-64 - Recreational
+        * Park-73 - Ski Resort
+        * Park-76 - Sports Venue
+        * Park-77 - State / National Park
+        * Park-88 - Zoo
+        * Port
+        * Port-22 - Cruise Line Terminal
+        * Port-29 - Ferry
+        * Port-43 - Marina
+        * Port-57 - Port
+        * School
+        * School-34 - Hospital
+        * School-36 - Junior College
+        * School-39 - Library / Museum
+        * School-44 - Medical Facility
+        * School-50 - Nursing Home / Assisted Living
+        * School-56 - Police / Fire / Rescue
+        * School-61 - Public Transit Station
+        * School-69 - School
+        * School-70 - School District Office
+        * School-79 - Trade School
+        * School-81 - University / College
+        * Secure
+        * Secure-32 - Government Site
+        * Secure-37 - Junkyard / Landfill
+        * Secure-45 - Military Base
+        * Secure-49 - Nuclear Power Plant
+        * Secure-51 - Oil / Gas
+        * Secure-58 - Power Plant
+        * Secure-59 - Prison / Detention Center
+        * Secure-63 - Rail Yard
+        * Secure-74 - Solar Power Farm
+        * Secure-82 - Utility Site
+        * Secure-84 - Waste Transfer Station
+        * Secure-85 - Water Treatment Plant
+        * Secure-86 - Wind Power Farm
+        * Storage
+        * Storage-18 - Container Freight Station
+        * Storage-71 - Self Storage Warehouse
+        * Tradeshow
+        * Tradeshow-16 - Conference Center
+        * Tradeshow-20 - Convention Center
+      enum:
+        - Airport
+        - Airport-3
+        - Church
+        - Church-55
+        - Club
+        - Club-21
+        - Club-60
+        - Construction
+        - Construction-17
+        - Fair
+        - Fair-27
+        - Farm
+        - Farm-30
+        - Farm-62
+        - Farm-87
+        - Hotel
+        - Hotel-14
+        - Hotel-35
+        - Hotel-41
+        - Hotel-47
+        - Hotel-54
+        - Hotel-65
+        - Hotel-66
+        - Mine
+        - Mine-46
+        - Other
+        - Other-6
+        - Other-7
+        - Other-8
+        - Other-9
+        - Other-12
+        - Other-13
+        - Other-19
+        - Other-23
+        - Other-24
+        - Other-25
+        - Other-26
+        - Other-28
+        - Other-31
+        - Other-33
+        - Other-38
+        - Other-40
+        - Other-42
+        - Other-48
+        - Other-52
+        - Other-67
+        - Other-68
+        - Other-72
+        - Other-75
+        - Other-78
+        - Other-80
+        - Other-83
+        - Park
+        - Park-4
+        - Park-5
+        - Park-10
+        - Park-11
+        - Park-15
+        - Park-53
+        - Park-64
+        - Park-73
+        - Park-76
+        - Park-77
+        - Park-88
+        - Port
+        - Port-22
+        - Port-29
+        - Port-43
+        - Port-57
+        - School
+        - School-34
+        - School-36
+        - School-39
+        - School-44
+        - School-50
+        - School-56
+        - School-61
+        - School-69
+        - School-70
+        - School-79
+        - School-81
+        - Secure
+        - Secure-32
+        - Secure-37
+        - Secure-45
+        - Secure-49
+        - Secure-51
+        - Secure-58
+        - Secure-59
+        - Secure-63
+        - Secure-74
+        - Secure-82
+        - Secure-84
+        - Secure-85
+        - Secure-86
+        - Storage
+        - Storage-18
+        - Storage-71
+        - Tradeshow
+        - Tradeshow-16
+        - Tradeshow-20
+    Payment_Terms:
+      title: Payment Terms
+      type: string
+      description: |
+        Valid values:
+        * Prepaid
+        * Collect
+        * Third Party
+      enum:
+        - Prepaid
+        - Collect
+        - Third Party
+    Packaging_Types:
+      title: Packaging Types
+      type: string
+      description: |
+        Valid values:
+        * BAG - Bag
+        * BAL - Bale
+        * BBL - Barrel
+        * BSK - Basket
+        * BIN - Bin
+        * BOX - Box
+        * BXT - Bucket
+        * BCH - Bunch
+        * BDL - Bundle
+        * CAB - Cabinet
+        * CAG - Cage
+        * CAN - Can
+        * CBY - Carboy
+        * CAR - Carrier
+        * CTN - Carton
+        * CAS - Case
+        * CSK - Cask
+        * CHS - Chest
+        * COL - Coil
+        * CNT - Container
+        * COR - Cores
+        * CRT - Crate
+        * CYL - Cylinder
+        * DRM - Drum
+        * DBK - Dry Bulk
+        * ENV - Envelope
+        * FIR - Firkin
+        * GLD - Gaylord
+        * HPR - Hamper
+        * HGH - Hogshead
+        * HRB - On Hanger or Rack in Boxes
+        * INT - Intermediate Bulk Container
+        * JAR - Jar
+        * JCN - Jerrycan
+        * KEG - Keg
+        * KIT - Kit
+        * LIF - Lifts
+        * LBK - Liquid Bulk
+        * LSE - Loose
+        * MXD - Mixed
+        * OTH - Other
+        * PKG - Package
+        * PCK - Packed
+        * PAL - Pail
+        * PAT - Pallet
+        * PCS - Piece
+        * PLN - Pipe Line
+        * RCK - Rack
+        * REL - Reel
+        * ROL - Roll
+        * SKD - Skid
+        * SLP - Slip Sheet
+        * SPL - Spool
+        * TNK - Tank
+        * TBN - Tote
+        * TRY - Tray
+        * TRU - Truckload
+        * TRK - Trunk
+        * TUB - Tub
+        * TBE - Tube
+        * UNT - Unit
+        * VPK - Van Pack
+        * WRP - Wrapped
+      enum:
+        - BAG
+        - BAL
+        - BBL
+        - BSK
+        - BIN
+        - BOX
+        - BXT
+        - BCH
+        - BDL
+        - CAB
+        - CAG
+        - CAN
+        - CBY
+        - CAR
+        - CTN
+        - CAS
+        - CSK
+        - CHS
+        - COL
+        - CNT
+        - COR
+        - CRT
+        - CYL
+        - DRM
+        - DBK
+        - ENV
+        - FIR
+        - GLD
+        - HPR
+        - HGH
+        - HRB
+        - INT
+        - JAR
+        - JCN
+        - KEG
+        - KIT
+        - LIF
+        - LBK
+        - LSE
+        - MXD
+        - OTH
+        - PKG
+        - PCK
+        - PAL
+        - PAT
+        - PCS
+        - PLN
+        - RCK
+        - REL
+        - ROL
+        - SKD
+        - SLP
+        - SPL
+        - TNK
+        - TBN
+        - TRY
+        - TRU
+        - TRK
+        - TUB
+        - TBE
+        - UNT
+        - VPK
+        - WRP
+    Requestor_Roles:
+      title: Requestor Roles
+      type: string
+      description: |
+        Valid values:
+        * Shipper
+        * Consignee
+        * Third Party
+      enum:
+        - Shipper
+        - Consignee
+        - Third Party
+    Shipping_Label_Formats:
+      title: Shipping Label Formats
+      type: string
+      description: |
+        Valid Values:
+         * Avery - 3-1/3" x 4" (6 labels per sheet)
+         * Letter - Standard letter sheet
+         * Zebra - 4" x 6" (1 label per sheet)
+      enum:
+        - Avery
+        - Letter
+        - Zebra
+    State_Province_Codes:
+      title: State/Province Codes
+      type: string
+      description: |
+        Valid values:
+        * AL - Alabama
+        * AK - Alaska
+        * AZ - Arizona
+        * AR - Arkansas
+        * CA - California
+        * CO - Colorado
+        * CT - Connecticut
+        * DC - District of Columbia
+        * DE - Delaware
+        * FL - Florida
+        * GA - Georgia
+        * HI - Hawaii
+        * ID - Idaho
+        * IL - Illinois
+        * IN - Indiana
+        * IA - Iowa
+        * KS - Kansas
+        * KY - Kentucky
+        * LA - Louisiana
+        * ME - Maine
+        * MD - Maryland
+        * MA - Massachusetts
+        * MI - Michigan
+        * MN - Minnesota
+        * MS - Mississippi
+        * MO - Missouri
+        * MT - Montana
+        * NE - Nebraska
+        * NV - Nevada
+        * NH - New Hampshire
+        * NJ - New Jersey
+        * NM - New Mexico
+        * NY - New York
+        * NC - North Carolina
+        * ND - North Dakota
+        * OH - Ohio
+        * OK - Oklahoma
+        * OR - Oregon
+        * PA - Pennsylvania
+        * PR - Puerto Rico
+        * RI - Rhode Island
+        * SC - South Carolina
+        * SD - South Dakota
+        * TN - Tennessee
+        * TX - Texas
+        * UT - Utah
+        * VT - Vermont
+        * VA - Virginia
+        * WA - Washington
+        * WV - West Virginia
+        * WI - Wisconsin
+        * WY - Wyoming
+        * AB - Alberta
+        * BC - British Columbia
+        * MB - Manitoba
+        * NB - New Brunswick
+        * NL - Newfoundland and Labrador
+        * NS - Nova Scotia
+        * NT - Northwest Territories
+        * NU - Nunavut
+        * ON - Ontario
+        * PE - Prince Edward Island
+        * QC - Quebec
+        * SK - Saskatchewan
+        * YT - Yukon
+        * CMX - Mexican Federal District 
+        * AGU - Aguascalientes
+        * BCN - Baja California
+        * BCS - Baja California Sur
+        * CAM - Campeche
+        * COA - Coahuila
+        * COL - Colima
+        * CHP - Chiapas
+        * CHH - Chihuahua
+        * DUR - Durango
+        * GUA - Guanajuato
+        * GRO - Guerrero
+        * HID - Hidalgo
+        * JAL - Jalisco
+        * MEX - Mexico
+        * MIC - Michoacan
+        * MOR - Morelos
+        * NAY - Nayarit
+        * NLE - Nuevo Leon
+        * OAX - Oaxaca
+        * PUE - Puebla
+        * QUE - Queretaro
+        * ROO - Quintana Roo
+        * SLP - San Luis Potosi
+        * SIN - Sinaloa
+        * SON - Sonora
+        * TAB - Tabasco
+        * TAM - Tamaulipas
+        * TLA - Tlaxcala
+        * VER - Veracruz
+        * YUC - Yucatan
+        * ZAC - Zacatecas
+      enum:
+        - AL
+        - AK
+        - AZ
+        - AR
+        - CA
+        - CO
+        - CT
+        - DC
+        - DE
+        - FL
+        - GA
+        - HI
+        - ID
+        - IL
+        - IN
+        - IA
+        - KS
+        - KY
+        - LA
+        - ME
+        - MD
+        - MA
+        - MI
+        - MN
+        - MS
+        - MO
+        - MT
+        - NE
+        - NV
+        - NH
+        - NJ
+        - NM
+        - NY
+        - NC
+        - ND
+        - OH
+        - OK
+        - OR
+        - PA
+        - PR
+        - RI
+        - SC
+        - SD
+        - TN
+        - TX
+        - UT
+        - VT
+        - VA
+        - WA
+        - WV
+        - WI
+        - WY
+        - AB
+        - BC
+        - MB
+        - NB
+        - NL
+        - NS
+        - NT
+        - NU
+        - ON
+        - PE
+        - QC
+        - SK
+        - YT
+        - CMX
+        - AGU
+        - BCN
+        - BCS
+        - CAM
+        - COA
+        - COL
+        - CHP
+        - CHH
+        - DUR
+        - GUA
+        - GRO
+        - HID
+        - JAL
+        - MEX
+        - MIC
+        - MOR
+        - NAY
+        - NLE
+        - OAX
+        - PUE
+        - QUE
+        - ROO
+        - SLP
+        - SIN
+        - SON
+        - TAB
+        - TAM
+        - TLA
+        - VER
+        - YUC
+        - ZAC
+    Time_Critical_Types:
+      title: Time Critical Types
+      type: string
+      description: |
+        Valid Values:
+          * Deliver On Date - Freight can only be delivered on the specified start date.
+          * Deliver On or After Date - Freight can only be delivered on or after the specified start date.
+          * Deliver By Date - Freight can only be delivered up to, and including, the specified start date.
+          * Delivery Window - Freight can only be delivered between the specified start and end dates.
+      enum:
+        - Deliver On Date
+        - Deliver On or After Date
+        - Deliver By Date
+        - Delivery Window
+    Result_Status_Codes:
+      title: Result Status Codes
+      type: string
+      description: |
+        Numerical codes describing any logical status outcomes.  Not all codes apply to this API, but are included to encourage adoption of these standards across API specifications.
+
+        Valid Values:
+          * 100 - Informational General Information
+          * 200 - Warning Non-Critical Error
+          * 300 - Failure Data Error
+          * 400 - Failure Formatting Error
+          * 500 - Failure Business Logic Error
+          * 600 - Failure Carrier Specific Error
+          * 700 - Failure Outside Ship Window
+          * 800 - Failure No Freight - Will be re-attempted
+          * 900 - Failure No Freight - Pick UP Closed
+          * 1000 - Failure Freight Not ready
+          * 1100 - Failure Packaging Problem
+          * 1200 - Failure BoL PDF Image Not Created
+          * 1300 - Failure Label PDF Image not Created
+          * 1400 - Failure Duplicate Pro
+          * 1500 - Failure Unknown Reason
+          * 1600 - Failure Shipper Closed
+          * 1700 - Failure Duplicate PO enum:
+        - '100'
+        - '200'
+        - '300'
+        - '400'
+        - '500'
+        - '600'
+        - '700'
+        - '800'
+        - '900'
+        - '1000'
+        - '1100'
+        - '1200'
+        - '1300'
+        - '1400'
+        - '1500'
+        - '1600'
+        - '1700'

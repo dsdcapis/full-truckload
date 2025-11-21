@@ -1,0 +1,470 @@
+openapi: 3.1.0
+info:
+  title: Invoice & Document API
+  version: "1.0.0-public-preview"
+  contact:
+    name: DSDC APIs Full Truckload
+    url: https://github.com/dsdcapis/full-truckload
+  license:
+    name: DSDC Repository License
+    url: https://github.com/dsdcapis/full-truckload/blob/main/LICENSE.md
+  description: |
+    # Overview
+
+    NMFTA is on a journey with logistical and banking institutions to transform the electronic transfer of invoice data and supporting documents through an open-source API. Systems across the economic landscape will leverage this information to bring speed through data availability. Today, EDI and digital document uploads across numerous company specific applications are required for doing business within the logistical sector. Ultimately, this work will include managing a corpus of electronic data values and document file type returns with the focus on the transfer of the Invoice and supporting documents supporting all logistical types.
+
+    Part of the journey is to build an open API to ensure all logistical and banking partners to reach a level of automation that scales with the business demand. With adoption of the FTL council, medium- and long-term value will be achieved for all parties across the economic markets and transportation providers. Teams from DSDC (Digital Standards Development Council) and support from the LTL council have come together for a collective goal to achieve business value for all.
+
+    **The GAP:** Multiple sources and various technology implementations have created an endless landscape for shippers, carriers, and banking institutions that continue to empower antiquated physical documentation or outgrown EDI processes. APIs do not currently have all consistent components to fully operationalize document data transfers and document type dissemination, especially in the areas of "invoice data values", "bill of lading" and "freight bills"
+
+    **Value Proposition:** The Invoice and Documents API will allow for the ability to seamlessly pass specific invoice and related shipment information regardless of transport type to obtain or pass an invoice or related documentation. This will transform the logistics industry by simplification of complex billing processes through accuracy and timeliness in one place will be paramount for all shipments. With a design to handle all complexities for any shipment, a simplified standard source will meet all business needs quickly while providing companies with the needed forecasting for growth.
+
+    - **Carriers:** Providing the ability to pass and create an invoice through details to a Shipper or 3rd Party through standard shipment details. Additional documentation will also be able to be passed for additional proof of payment through supporting document types through shipment criteria. The ease will allow for Carriers to ensure that they avoid being cornered within the market.
+    - **Shippers:** Receiving Carrier invoices and supplemental documentation for payment will allow for central standard empowering timely and accurate validation of services while providing the ability to eliminate slower physical or open-source transfers.
+    - **3rd Party:** Ensuring no delay in data validation or accuracy in supplying the appropriate information to support Invoice and supporting documentation for all parties
+
+    # Product Requirements Document (PRD)
+
+    The Product Requirements Document (PRD) for this API can be found [here](https://github.com/dsdcapis/full-truckload/blob/main/api-prds/API%20Product%20Requirements%20-%20Invoice%20Documents.pdf).
+tags:
+  - name: Invoice Management
+    description: Endpoints for creating, retrieving, and managing invoices.
+  - name: Document Management
+    description: Endpoints for uploading, and managing supporting documents.
+
+paths:
+  /invoice:
+    post:
+      operationId: createInvoice
+      summary: Create an Invoice
+      description: |
+        ## Request        
+        As a Carrier, I want to Create an Invoice and send shipment information for a particular 
+        Shipper or 3rd Party.        
+        - In a request, the Carrier MUST provide a shipmentID provided by the Shipper or 
+          3rd Party participant. 
+          - LTL Consideration: Pro Number may be valid for proper tracking to the 
+            BOL generation process. 
+        - In a request, the Carrier MUST identify themselves, so the Shipper/3rd Party is 
+          aware of who is sending the Invoice information
+            - Types of universal identifiers: DOT Number or MC number.
+        - In a request, the Carrier MUST designate the Invoice Number to properly record 
+          the instance of payment for the Shipper/3rd party.
+        - In a request, the Carrier MUST designate a Date associated with their shipment
+          so that proper payment intervals are followed to by the Shipper/3rd party.
+        - In a request, the Carrier MUST specify an amount for proper payment tracking 
+          and agreed upon terms specified in the tender. 
+        
+        ## Response        
+        - In a response, NMFTA MUST provide a response for successful or failure 
+          to transfer identification and values.
+        - In a response, the Shipper/3rd Party MUST provide an acceptance or 
+          failure of transfer.
+      tags: [ Invoice Management ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/schemas.yaml#/components/schemas/Invoice'
+      responses:
+        '201':
+          description: Invoice created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /invoice/{uniqueID}:
+    get:
+      operationId: getInvoice
+      summary: Get an Invoice
+      description: |
+        As a Carrier, I want to retrieve an Invoice by its Invoice Number.
+        - In a request, the Carrier MUST provide the Unique Identifier, Shipment ID, DOT Number, MC Number and Invoice Number to retrieve the specific invoice details.
+      tags:
+        - Invoice Management
+      parameters:
+        - name: uniqueID
+          in: path
+          required: true
+          description: Unique identifier for the invoice to update.
+          schema:
+            type: string
+        - name: shipmentID
+          in: query
+          required: true
+          description: Unique identifier for the shipment associated with the invoice.
+          schema:
+            type: string
+        - name: DOT
+          in: query
+          required: true
+          description: Department of Transportation identifier
+          schema:
+            type: string
+        - name: MC
+          in: query
+          required: true
+          description: Motor Carrier Identifier
+          schema:
+            type: string
+        - name: invoiceNumber
+          in: query
+          required: true
+          description: Invoice number to filter the invoice.
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Invoice retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/Invoice'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+
+    put:
+      operationId: updateInvoice
+      summary: Update (Replace) an Invoice
+      description: |
+        Fully replaces an existing invoice with the provided data.
+        - The request MUST provide the Unique Identifier, Shipment ID, DOT Number, MC Number and Invoice Number to update the specific invoice.
+        - The request body must contain the complete invoice object.
+      tags: [ Invoice Management ]
+      parameters:
+        - name: uniqueID
+          in: path
+          required: true
+          description: Unique identifier for the invoice to update.
+          schema:
+            type: string
+        - name: shipmentID
+          in: query
+          required: true
+          description: Unique identifier for the shipment associated with the invoice.
+          schema:
+            type: string
+        - name: DOT
+          in: query
+          required: true
+          description: Department of Transportation identifier
+          schema:
+            type: string
+        - name: MC
+          in: query
+          required: true
+          description: Motor Carrier Identifier
+          schema:
+            type: string
+        - name: invoiceNumber
+          in: query
+          required: true
+          description: Invoice number to filter the invoice.
+          schema:
+            type: string
+        - name: attributes
+          in: query
+          required: false
+          description: Optional attributes related to the invoice.
+          schema:
+            type: array
+            items:
+              $ref: './schemas/schemas.yaml#/components/schemas/Attribute'
+        - name: comments
+          in: query
+          required: false
+          description: Optional comments related to the invoice.
+          schema:
+            type: array
+            items:
+              $ref: './schemas/schemas.yaml#/components/schemas/Comment'
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/schemas.yaml#/components/schemas/Invoice'
+
+      responses:
+        '200':
+          description: Invoice updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+
+    delete:
+      operationId: deleteInvoice
+      summary: Delete an Invoice
+      description: |
+        Deletes an existing invoice by its unique identifier.
+        - The request MUST provide the Unique Identifier, Shipment ID, DOT Number, MC Number and Invoice Number to update the specific invoice.
+        - The request MAY include a reason for deletion.
+      tags: [ Invoice Management ]
+      parameters:
+        - name: uniqueID
+          in: path
+          required: true
+          description: Unique identifier for the invoice to delete.
+          schema:
+            type: string
+        - name: shipmentID
+          in: query
+          required: true
+          description: Unique identifier for the shipment associated with the invoice.
+          schema:
+            type: string
+        - name: DOT
+          in: query
+          required: true
+          description: Department of Transportation identifier
+          schema:
+            type: string
+        - name: MC
+          in: query
+          required: true
+          description: Motor Carrier Identifier
+          schema:
+            type: string
+        - name: invoiceNumber
+          in: query
+          required: true
+          description: Invoice number to filter the invoice.
+          schema:
+            type: string
+        - name: comments
+          in: query
+          required: false
+          description: Optional comments related to the invoice deletion.
+          schema:
+            $ref: './schemas/schemas.yaml#/components/schemas/Comment'
+
+      responses:
+        '204':
+          description: Invoice deleted successfully. No content returned.
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+
+  ######## Document Management Endpoints ########
+  /document:
+    post:
+      operationId: uploadDocument
+      summary: Upload Supporting Documents
+      description: |
+        ## Request
+        As a Carrier, I want to upload supporting documents for an invoice.
+        - In a request, the Carrier MUST provide the Invoice Number to associate the document with the correct invoice.
+        - In a request, the Carrier MUST designate the document type so that the acceptance of the response can be 
+          tracked on the Shipper/3rd Party side. This can range from the Invoice to the supported twenty-four (24) document types.
+        - The request MUST include the document file in PDF, TIF, JPEG, or PNG format.
+        - The maximum file size MUST not exceed 25 MB.
+        - In a request, the Carrier MUST specify the document type so that the 
+          acceptance of the response can be tracked on the Shipper/3rd Party side. This 
+          can range from the Invoice to the supported twenty-four (24) document types.
+            - Bill of Lading (BOL)
+            - Catalog Page (CAT)
+            - Communications & Correspondence (COMM)
+            - Contract (CON)
+            - Customer Specific Rules Tariff (RULE)
+            - Dimension Certificate (DIM)
+            - Detention Receipt (DTR)
+            - Discount Matrix (DIS)
+            - Freight Bill (FRB)
+            - Fuel Tables (FUEL)
+            - Invoice (INV)
+            - Inspection Certificate (INSP)
+            - Letter of Authority (LOA)
+            - Lumper Receipt (LPR)
+            - Material Safety Data Sheet (MSDS)
+            - Packing Slip (PAC)
+            - Photos (IMG)
+            - Proof of Delivery (POD)
+            - Quote (QUO)
+            - Residential Dispute Support (RESI)
+            - Spec Sheet (SPEC)
+            - Scale (SCL)
+            - Statement Bill (STB)
+            - Weight & Inspection Certificate (W&I)
+        
+        ## Response
+          - In a response, NMFTA MUST provide a response for successful or failure to transfer identification and values.
+          - In a response, the Shipper/3rd Party MUST provide an acceptance or failure of transfer.
+      tags: [ Document Management ]
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/schemas.yaml#/components/schemas/DocumentRequest'
+
+      responses:
+        '201':
+          description: Document uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /document/{invoiceNumber}:
+    get:
+      operationId: getDocument
+      summary: Retrieve Supporting Documents
+      description: |
+        As a Carrier, I want to retrieve supporting documents for an invoice by its Invoice Number.
+        - In a request, the Carrier MUST provide the Invoice Number, DOT, and MC to retrieve the specific documents.
+        - The request MAY include one or more documentType values as a query array to filter the results.
+      tags: [ Document Management ]
+      parameters:
+        - name: invoiceNumber
+          in: path
+          required: true
+          description: Invoice number to filter the documents.
+          schema:
+            type: string
+        - name: DOT
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Department of Transportation identifier.
+        - name: MC
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Motor Carrier Identifier.
+        - name: documentType
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: './schemas/schemas.yaml#/components/schemas/DocumentType'
+            style: form
+            explode: true
+            description: One or more document types to be retrieved (e.g., Invoice, BOL).
+
+      responses:
+        '200':
+          description: Document(s) retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/DocumentResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+
+    delete:
+      operationId: deleteDocument
+      summary: Delete Supporting Documents or Files
+      description: |
+        Delete all supporting documents for an invoice, or specific files within the documents.
+        - The request MUST provide the Invoice Number, DOT, and MC to delete the specific document.
+        - If no fileIds are provided, all documents for the invoice will be deleted.
+        - If fileIds are provided, only those files will be deleted from the documents.
+        - The request MAY include a comment for deletion.
+      tags: [ Document Management ]
+      parameters:
+        - name: invoiceNumber
+          in: path
+          required: true
+          description: Invoice number to identify the documents.
+          schema:
+            type: string
+        - name: DOT
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Department of Transportation identifier.
+        - name: MC
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Motor Carrier Identifier.
+        - name: fileIds
+          in: query
+          required: false
+          description: List of file IDs to delete. If omitted, all documents for the invoice will be deleted.
+          schema:
+            type: array
+            items:
+              type: string
+              style: form
+              explode: true
+        - name: comments
+          in: query
+          required: false
+          description: Optional comments related to the document deletion.
+          schema:
+            $ref: './schemas/schemas.yaml#/components/schemas/Comment'
+
+      responses:
+        '204':
+          description: Document(s) or file(s) deleted successfully. No content returned.
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+
+components:
+  responses:
+    ErrorResponse:
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ResultStatusCode'
+  schemas:
+    ResultStatusCode:
+      title: Result Status Code
+      description: Numerical codes describing any logical status outcomes.  Not all codes apply to this API, but are included to encourage adoption of these standards across API specifications.
+      oneOf:
+        - const: "100"
+          description: Informational General Information
+        - const: "200"
+          description: Warning Non-Critical Error
+        - const: "300"
+          description: Failure Data Error
+        - const: "400"
+          description: Failure Formatting Error
+        - const: "500"
+          description: Failure Business Logic Error
+        - const: "600"
+          description: Failure Carrier Specific Error
+        - const: "700"
+          description: Failure Unknown Reason
