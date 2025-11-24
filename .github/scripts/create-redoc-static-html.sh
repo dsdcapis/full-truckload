@@ -286,6 +286,9 @@ generateHighLevelIndex() {
 # for ReDoc documentation. It handles the main workflow, including any necessary setup,
 # execution of commands, and error handling required to generate the documentation output.
 mainProcess() {
+    echo "Removing existing public folder..."
+    rm -rf "$publicFolder"
+    
     declare -A allFiles
     findAllFiles allFiles
 
