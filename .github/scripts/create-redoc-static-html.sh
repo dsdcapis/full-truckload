@@ -33,8 +33,11 @@ loadStaticHtmlToFolder() {
     echo "Creating folder \"$publicFolder/$folder\""
     mkdir -p "$publicFolder/$folder"
 
+    echo "Running redocly/openapi-cli bundle command on \"$currentFolder/$folder/openapi.yaml\" and saving it to \"$publicFolder/$folder/openapi-combined.yaml\""
+    npx @redocly/openapi-cli@latest bundle "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/openapi-combined.yaml" --ext yaml
+
     echo "Running redocly/cli build-docs command on \"$currentFolder/$folder/openapi.yaml\" and saving it to \"$publicFolder/$folder/index.html\""
-    npx @redocly/cli@latest build-docs "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/index.html"
+    npx @redocly/cli@latest build-docs "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/index.html" --theme.openapi.downloadDefinitionUrl="openapi-combined.yaml"
 }
 
 # Generates a high-level index for the Redoc static HTML documentation and PDF files.
@@ -122,9 +125,15 @@ generateHighLevelIndex() {
     .hidden {
         display: none;
     }
+    img.logo {
+        max-height: 100px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 </style>
 <body>
-    <p>Supported by the Digital Standard Development Council's (DSDC) Digital LTL Council, these API standards help organizations modernize LTL workflows through standardized, open, and scalable integration.</p>
+    <img class="logo" src="images/DSDC-Truckload.svg" alt="Company Logo">
+    <p>Supported by the Digital Standard Development Council's (DSDC) Digital FTL Council, these API standards help organizations modernize FTL workflows through standardized, open, and scalable integration.</p>
     <h1>API Documentation Index</h1>
     <ul class=\"tree\" id=\"root\">" > "$indexFile"
 
@@ -282,6 +291,12 @@ generateHighLevelIndex() {
     echo "Created high level index at \"$indexFile\""
 }
 
+copyImages() {
+    echo "Copying images..."
+    mkdir -p "$publicFolder/images"
+    cp "$currentFolder/images/DSDC-Truckload.svg" "$publicFolder/images/"
+}
+
 # mainProcess is the primary function that orchestrates the creation of a static HTML file
 # for ReDoc documentation. It handles the main workflow, including any necessary setup,
 # execution of commands, and error handling required to generate the documentation output.
@@ -302,6 +317,7 @@ mainProcess() {
 
     # Process PDF files in generateHighLevelIndex
     generateHighLevelIndex
+    copyImages
 }
 
 mainProcess

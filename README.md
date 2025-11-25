@@ -26,6 +26,10 @@ To read the specs, visit [dsdcapis.github.io/full-truckload/](https://dsdcapis.g
 
 See the [CONTRIBUTING file](CONTRIBUTING.md) in the repository for more details on how to participate.
 
+## Feedback and Issues
+
+Have questions, feedback, or found an issue? Please use [GitHub Issues](https://github.com/dsdcapis/full-truckload/issues) to report bugs, request features, or share comments about the APIs and specifications in this repository.
+
 ## Governance
 
 See the [GOVERNANCE file](GOVERNANCE.md) in the repository for more details about how governance will work.

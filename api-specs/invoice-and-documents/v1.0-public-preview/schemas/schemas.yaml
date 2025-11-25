@@ -591,6 +591,7 @@ components:
           description: Motor Carrier Identifier
 
     DocumentRequest:
+      title: Document Request
       description: |
         Request object for uploading an supporting document. This includes all necessary identifiers and optional 
         information to ensure proper tracking and processing of the document.
@@ -636,6 +637,7 @@ components:
                   description: Array of files for this document type (PDF, TIF, JPEG, PNG, max 25 MB each)
 
     DocumentResponse:
+      title: Document Response
       description: |
         Response object for retrieving an invoice and supporting document. This includes all necessary identifiers and optional 
         information to ensure proper retrieval of the document.
@@ -689,6 +691,7 @@ components:
                       description: File content (PDF, TIF, JPEG, PNG, max 25 MB each)
 
     DocumentType:
+      title: Document Type
       type: string
       description: |
         - The type of document being sent. This can be one of the predefined types such as Invoice, Bill of Lading, etc.
