@@ -68,12 +68,60 @@ paths:
             schema:
               $ref: './schemas/schemas.yaml#/components/schemas/Invoice'
       responses:
-        '201':
+        '200':
           description: Invoice created successfully.
           content:
             application/json:
               schema:
                 $ref: './schemas/schemas.yaml#/components/schemas/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
+    get:
+      operationId: listInvoices
+      summary: List Invoices
+      description: |
+        As a Carrier, I want to list all Invoices.
+        - The request MAY include optional query parameters to filter the results, such as 
+          unique ID, shipment ID, DOT Number, MC Number, or invoice number.
+        - All query parameters are optional and can be used individually or in combination to filter results.
+      tags: [ Invoice Management ]
+      parameters:
+        - name: uniqueID
+          in: query
+          description: Unique identifier for the invoice.
+          schema:
+            type: string
+        - name: shipmentID
+          in: query
+          description: Unique identifier for the shipment associated with the invoice.
+          schema:
+            type: string
+        - name: DOT
+          in: query
+          description: Department of Transportation identifier
+          schema:
+            type: string
+        - name: MC
+          in: query
+          description: Motor Carrier Identifier
+          schema:
+            type: string
+        - name: invoiceNumber
+          in: query
+          description: Invoice number to filter the invoice.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoices retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/schemas.yaml#/components/schemas/Invoice'
         '400':
           $ref: '#/components/responses/ErrorResponse'
         '404':
@@ -84,8 +132,8 @@ paths:
       operationId: getInvoice
       summary: Get an Invoice
       description: |
-        As a Carrier, I want to retrieve an Invoice by its Invoice Number.
-        - In a request, the Carrier MUST provide the Unique Identifier, Shipment ID, DOT Number, MC Number and Invoice Number to retrieve the specific invoice details.
+        As a Carrier, I want to retrieve an Invoice by its unique identifier.
+        - In a request, the Carrier MUST provide the Unique Identifier in the path to retrieve the specific invoice details.
       tags:
         - Invoice Management
       parameters:
@@ -95,31 +143,6 @@ paths:
           description: Unique identifier for the invoice to update.
           schema:
             type: string
-        - name: shipmentID
-          in: query
-          required: true
-          description: Unique identifier for the shipment associated with the invoice.
-          schema:
-            type: string
-        - name: DOT
-          in: query
-          required: true
-          description: Department of Transportation identifier
-          schema:
-            type: string
-        - name: MC
-          in: query
-          required: true
-          description: Motor Carrier Identifier
-          schema:
-            type: string
-        - name: invoiceNumber
-          in: query
-          required: true
-          description: Invoice number to filter the invoice.
-          schema:
-            type: string
-
       responses:
         '200':
           description: Invoice retrieved successfully
@@ -137,8 +160,9 @@ paths:
       summary: Update (Replace) an Invoice
       description: |
         Fully replaces an existing invoice with the provided data.
-        - The request MUST provide the Unique Identifier, Shipment ID, DOT Number, MC Number and Invoice Number to update the specific invoice.
-        - The request body must contain the complete invoice object.
+        - The request MUST provide the Unique Identifier in the path to identify the invoice to update.
+        - The request body MUST contain the complete invoice object with all required fields (uniqueID, shipmentID, DOT, MC, invoiceHeader, invoiceCharges).
+        - The request MAY include optional comments as a query parameter.
       tags: [ Invoice Management ]
       parameters:
         - name: uniqueID
@@ -147,38 +171,6 @@ paths:
           description: Unique identifier for the invoice to update.
           schema:
             type: string
-        - name: shipmentID
-          in: query
-          required: true
-          description: Unique identifier for the shipment associated with the invoice.
-          schema:
-            type: string
-        - name: DOT
-          in: query
-          required: true
-          description: Department of Transportation identifier
-          schema:
-            type: string
-        - name: MC
-          in: query
-          required: true
-          description: Motor Carrier Identifier
-          schema:
-            type: string
-        - name: invoiceNumber
-          in: query
-          required: true
-          description: Invoice number to filter the invoice.
-          schema:
-            type: string
-        - name: attributes
-          in: query
-          required: false
-          description: Optional attributes related to the invoice.
-          schema:
-            type: array
-            items:
-              $ref: './schemas/schemas.yaml#/components/schemas/Attribute'
         - name: comments
           in: query
           required: false
@@ -187,7 +179,6 @@ paths:
             type: array
             items:
               $ref: './schemas/schemas.yaml#/components/schemas/Comment'
-
       requestBody:
         required: true
         content:
@@ -212,8 +203,8 @@ paths:
       summary: Delete an Invoice
       description: |
         Deletes an existing invoice by its unique identifier.
-        - The request MUST provide the Unique Identifier, Shipment ID, DOT Number, MC Number and Invoice Number to update the specific invoice.
-        - The request MAY include a reason for deletion.
+        - The request MUST provide the Unique Identifier in the path to identify the invoice to delete.
+        - The request MAY include optional comments as a query parameter for the deletion.
       tags: [ Invoice Management ]
       parameters:
         - name: uniqueID
@@ -222,37 +213,12 @@ paths:
           description: Unique identifier for the invoice to delete.
           schema:
             type: string
-        - name: shipmentID
-          in: query
-          required: true
-          description: Unique identifier for the shipment associated with the invoice.
-          schema:
-            type: string
-        - name: DOT
-          in: query
-          required: true
-          description: Department of Transportation identifier
-          schema:
-            type: string
-        - name: MC
-          in: query
-          required: true
-          description: Motor Carrier Identifier
-          schema:
-            type: string
-        - name: invoiceNumber
-          in: query
-          required: true
-          description: Invoice number to filter the invoice.
-          schema:
-            type: string
         - name: comments
           in: query
           required: false
           description: Optional comments related to the invoice deletion.
           schema:
             $ref: './schemas/schemas.yaml#/components/schemas/Comment'
-
       responses:
         '204':
           description: Invoice deleted successfully. No content returned.
@@ -265,7 +231,6 @@ paths:
         '404':
           $ref: '#/components/responses/ErrorResponse'
 
-  ######## Document Management Endpoints ########
   /documents:
     post:
       operationId: uploadDocument
@@ -329,6 +294,50 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '404':
           $ref: '#/components/responses/ErrorResponse'
+    get:
+      operationId: listDocuments
+      summary: List Supporting Documents
+      description: |
+        As a Carrier, I want to list all supporting documents for invoices.
+        - The request MAY include optional query parameters such as Invoice Number, DOT Number, MC Number, or documentType to filter the results.
+        - All query parameters are optional and can be used individually or in combination to filter results.
+      tags: [ Document Management ]
+      parameters:
+        - name: invoiceNumber
+          in: query
+          description: Invoice number to filter the documents.
+          schema:
+            type: string
+        - name: DOT
+          in: query
+          schema:
+            type: string
+            description: Department of Transportation identifier.
+        - name: MC
+          in: query
+          schema:
+            type: string
+            description: Motor Carrier Identifier.
+        - name: documentType
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: './schemas/schemas.yaml#/components/schemas/DocumentType'
+            description: One or more document types to be retrieved (e.g., Invoice, BOL).
+      responses:
+        '200':
+          description: Documents retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './schemas/schemas.yaml#/components/schemas/DocumentResponse'
+        '400':
+          $ref: '#/components/responses/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ErrorResponse'
 
   /documents/{invoiceNumber}:
     get:
@@ -336,8 +345,7 @@ paths:
       summary: Retrieve Supporting Documents
       description: |
         As a Carrier, I want to retrieve supporting documents for an invoice by its Invoice Number.
-        - In a request, the Carrier MUST provide the Invoice Number, DOT, and MC to retrieve the specific documents.
-        - The request MAY include one or more documentType values as a query array to filter the results.
+        - In a request, the Carrier MUST provide the Invoice Number in the path to retrieve the specific documents.
       tags: [ Document Management ]
       parameters:
         - name: invoiceNumber
@@ -346,27 +354,6 @@ paths:
           description: Invoice number to filter the documents.
           schema:
             type: string
-        - name: DOT
-          in: query
-          required: true
-          schema:
-            type: string
-            description: Department of Transportation identifier.
-        - name: MC
-          in: query
-          required: true
-          schema:
-            type: string
-            description: Motor Carrier Identifier.
-        - name: documentType
-          in: query
-          required: false
-          schema:
-            type: array
-            items:
-              $ref: './schemas/schemas.yaml#/components/schemas/DocumentType'
-            description: One or more document types to be retrieved (e.g., Invoice, BOL).
-
       responses:
         '200':
           description: Document(s) retrieved successfully
@@ -384,10 +371,9 @@ paths:
       summary: Delete Supporting Documents or Files
       description: |
         Delete all supporting documents for an invoice, or specific files within the documents.
-        - The request MUST provide the Invoice Number, DOT, and MC to delete the specific document.
-        - If no fileIds are provided, all documents for the invoice will be deleted.
-        - If fileIds are provided, only those files will be deleted from the documents.
-        - The request MAY include a comment for deletion.
+        - The request MUST provide the Invoice Number in the path to identify the documents to delete.
+        - The request MAY include optional fileIds as a query parameter to delete specific files. If omitted, all documents for the invoice will be deleted.
+        - The request MAY include optional comments as a query parameter for the deletion.
       tags: [ Document Management ]
       parameters:
         - name: invoiceNumber
@@ -396,18 +382,6 @@ paths:
           description: Invoice number to identify the documents.
           schema:
             type: string
-        - name: DOT
-          in: query
-          required: true
-          schema:
-            type: string
-            description: Department of Transportation identifier.
-        - name: MC
-          in: query
-          required: true
-          schema:
-            type: string
-            description: Motor Carrier Identifier.
         - name: fileIds
           in: query
           required: false
