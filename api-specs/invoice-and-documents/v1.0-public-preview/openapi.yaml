@@ -25,7 +25,7 @@ info:
 
     # Product Requirements Document (PRD)
 
-    The Product Requirements Document (PRD) for this API can be found [here](../../../api-prds/API%20Product%20Requirements%20-%20Invoice%20Documents.pdf).
+    The Product Requirements Document (PRD) for this API can be found [here](https://dsdcapis.github.io/full-truckload/api-prds/API%20Product%20Requirements%20-%20Invoice%20Documents.pdf).
 tags:
   - name: Invoice Management
     description: Endpoints for creating, retrieving, and managing invoices.
@@ -33,7 +33,7 @@ tags:
     description: Endpoints for uploading, and managing supporting documents.
 
 paths:
-  /invoice:
+  /invoices:
     post:
       operationId: createInvoice
       summary: Create an Invoice
@@ -79,7 +79,7 @@ paths:
         '404':
           $ref: '#/components/responses/ErrorResponse'
 
-  /invoice/{uniqueID}:
+  /invoices/{uniqueID}:
     get:
       operationId: getInvoice
       summary: Get an Invoice
@@ -266,7 +266,7 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
 
   ######## Document Management Endpoints ########
-  /document:
+  /documents:
     post:
       operationId: uploadDocument
       summary: Upload Supporting Documents
@@ -330,7 +330,7 @@ paths:
         '404':
           $ref: '#/components/responses/ErrorResponse'
 
-  /document/{invoiceNumber}:
+  /documents/{invoiceNumber}:
     get:
       operationId: getDocument
       summary: Retrieve Supporting Documents
@@ -365,8 +365,6 @@ paths:
             type: array
             items:
               $ref: './schemas/schemas.yaml#/components/schemas/DocumentType'
-            style: form
-            explode: true
             description: One or more document types to be retrieved (e.g., Invoice, BOL).
 
       responses:
@@ -418,15 +416,12 @@ paths:
             type: array
             items:
               type: string
-              style: form
-              explode: true
         - name: comments
           in: query
           required: false
           description: Optional comments related to the document deletion.
           schema:
             $ref: './schemas/schemas.yaml#/components/schemas/Comment'
-
       responses:
         '204':
           description: Document(s) or file(s) deleted successfully. No content returned.
@@ -438,7 +433,6 @@ paths:
           $ref: '#/components/responses/ErrorResponse'
         '404':
           $ref: '#/components/responses/ErrorResponse'
-
 components:
   responses:
     ErrorResponse:

@@ -102,7 +102,7 @@ info:
 
     # Product Requirements Document (PRD)
 
-    The Product Requirements Document (PRD) for this API can be found [here](../../../api-prds/API%20Product%20Requirements%20-%20eBOL.pdf).
+    The Product Requirements Document (PRD) for this API can be found [here](https://dsdcapis.github.io/full-truckload/api-prds/API%20Product%20Requirements%20-%20eBOL.pdf).
 tags:
   - name: Carrier API Standards
     description: Standards for Carrier APIs
