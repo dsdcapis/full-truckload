@@ -1,0 +1,377 @@
+openapi: 3.1.0
+info:
+  title: In Transit Visibility API Schemas
+  version: 1.0.0-TL
+  description: >-
+    This file contains the schema definitions for the In Transit Visibility API.
+components:
+  headers:
+    Location:
+      description: |
+        Refers to a specific resource in relation to the response. The type of
+        relationship is defined by the combination of request method and status code
+        semantics. See [RFC 7231, Section 7.1.2](https://tools.ietf.org/html/rfc7231#section-7.1.2).
+      schema:
+        type: string
+        format: uri
+  responses:
+    UnexpectedError:
+      description: Unexpected error
+      content:
+        application/problem+json:
+          schema: 
+            $ref: '#/components/schemas/ProblemDetails'
+
+  schemas:
+    EventsPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items: 
+            $ref: '#/components/schemas/Event'
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+          description: Total number of pages if known (may be null for performance).
+        totalCount:
+          type: integer
+          description: Total number of items if known (may be null for performance).
+      required: 
+        - data
+        - page
+        - pageSize
+
+    EventBatch:
+      type: object
+      description: Batch delivery of events for webhook posts.
+      properties:
+        deliveryId:
+          type: string
+          description: Stable id for this delivery (constant across retries).
+        sentAt:
+          type: string
+          format: date-time
+          description: When the batch was sent by the publisher.
+        events:
+          type: array
+          minItems: 1
+          items: 
+            $ref: '#/components/schemas/Event'
+      required: 
+        - deliveryId
+        - sentAt
+        - events
+
+    Event:
+      type: object
+      description: Standardized shipment event
+      properties:
+        eventId:
+          type: string
+          description: Event id (UUID or ULID)
+        type:
+          $ref: '#/components/schemas/EventType'
+        status:
+          type: string
+          description: Optional carrier-native status code or text.
+        occurredAt:
+          type: string
+          format: date-time
+          description: When the event happened (source-of-truth time).
+        reportedAt:
+          type: string
+          format: date-time
+          description: When the event was recorded in your system.
+        sequence:
+          type: integer
+          minimum: 0
+          description: Per-shipment monotonically increasing sequence for ordering.
+        location:
+          $ref: '#/components/schemas/Location'
+        notes:
+          type: string
+        attributes:
+          type: object
+          additionalProperties: true
+          description: Extensible key/value metadata (e.g., terminalCode, reasonCode).
+        documents:
+          type: array
+          items:
+            type: object
+            properties:
+              type: 
+                type: string
+                enum: 
+                  - POD
+                  - BOL
+                  - INVOICE
+                  - LABEL
+                  - OTHER
+                default: OTHER
+              url: 
+                type: string
+                format: uri
+              mimeType: 
+                type: string
+        shipment:
+          $ref: '#/components/schemas/Shipment'              
+      required: 
+        - eventId
+        - shipment
+        - type
+        - occurredAt
+        - sequence
+
+    EventType:
+      type: string
+      description: Normalized event taxonomy across modes.
+      enum:
+        - PICKUP_SCHEDULED
+        - PICKUP_ATTEMPTED
+        - PICKED_UP
+        - ARRIVED_AT_TERMINAL
+        - DEPARTED_TERMINAL
+        - IN_TRANSIT
+        - DELAY
+        - EXCEPTION
+        - CUSTOMS_HOLD
+        - CUSTOMS_CLEARED
+        - OUT_FOR_DELIVERY
+        - DELIVERY_ATTEMPTED
+        - DELIVERED
+        - PROOF_OF_DELIVERY
+        - CANCELLED
+        - GATE_IN
+        - GATE_OUT
+        - VESSEL_LOADED
+        - VESSEL_UNLOADED
+        - RAIL_ARRIVAL
+        - RAIL_DEPARTURE
+        - AIR_DEPARTURE
+        - AIR_ARRIVAL
+        - OTHER
+      default: OTHER
+
+    Shipment:
+      type: object
+      properties:
+        shipmentId:
+          type: string
+          description: Unique shipment identifier.
+        mode:
+          $ref: '#/components/schemas/TransportationMode'
+        scac:
+          type: string
+          description: Standard Carrier Alpha Code (if applicable).
+        references:
+          type: array
+          items:
+            type: object
+            properties:
+              type: 
+                type: string
+              value: 
+                type: string
+        requestedPickupDate: 
+          type: string
+          format: date-time
+        startDate: 
+          type: string
+          format: date-time
+        endDate: 
+          type: string
+          format: date-time
+        origin:
+          $ref: '#/components/schemas/Location'
+        destination:
+          $ref: '#/components/schemas/Location'          
+      required: 
+        - shipmentId
+        - origin
+        - destination
+
+    TransportationMode:
+      type: string
+      enum:
+        - FTL
+        - LTL
+        - PARCEL
+        - OCEAN
+        - AIR
+        - RAIL
+        - INTERMODAL
+        - OTHER
+      default: OTHER
+
+    Location:
+      type: object
+      properties:
+        locationId:
+          type: string
+          description: Unique location ID.
+        name: 
+          type: string
+        type: 
+          type: string
+          enum: 
+            - FACILITY
+            - CITY
+            - GEOPOINT
+          default: GEOPOINT
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+        city: 
+          type: string
+        state: 
+          type: string
+        postalCode: 
+          type: string
+        country:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: ISO 3166-1 alpha-3
+        address1: 
+          type: string
+        address2: 
+          type: string
+
+    SubscriptionsPage:
+      type: object
+      properties:
+        data:
+          type: array
+          items: 
+            $ref: '#/components/schemas/Subscription'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+        totalCount:
+          type: integer
+      required: 
+        - data
+        - page
+        - pageSize
+
+    SubscriptionBase:
+      type: object
+      properties:
+        endpointUrl: 
+          type: string
+          format: uri
+        hmacSecretId:
+          type: string
+          description: Reference to the stored secret used for HMAC signing.
+        filters:
+          type: object
+          properties:
+            eventTypes:
+              type: array
+              items: 
+                $ref: '#/components/schemas/EventType'
+            shipmentIds:
+              type: array
+              items: 
+                type: string
+          additionalProperties: false
+        delivery:
+          $ref: '#/components/schemas/DeliveryMetadata'
+
+    Subscription:
+      allOf:
+        - $ref: '#/components/schemas/SubscriptionBase'
+        - type: object
+          properties:
+            id: 
+              type: string
+            createdAt: 
+              type: string
+              format: date-time
+            updatedAt: 
+              type: string
+              format: date-time
+            status: 
+              type: string
+              enum: 
+                - active
+                - paused
+                - inactive
+              default: active
+          required: 
+            - id
+            - createdAt
+            - updatedAt
+            - status
+            - endpointUrl
+      unevaluatedProperties: false
+
+    SubscriptionCreate:
+      allOf:
+        - $ref: '#/components/schemas/SubscriptionBase'
+        - type: object
+          required: 
+            - endpointUrl
+            - hmacSecretId
+      unevaluatedProperties: false          
+
+    SubscriptionPatch:
+      allOf:
+        - $ref: '#/components/schemas/SubscriptionBase'
+        - type: object
+          properties:
+            status: 
+              type: string
+              enum: 
+                - active
+                - paused
+                - inactive
+              default: active
+      unevaluatedProperties: false            
+
+    DeliveryMetadata:
+      type: object
+      properties:
+        maxAttempts: 
+          type: integer
+          minimum: 1
+          default: 12
+          description: Total number of retry attempts before giving up
+        initialBackoffSeconds: 
+          type: integer
+          minimum: 1
+          default: 5
+          description: Delay before first retry
+        maxBackoffSeconds: 
+          type: integer
+          minimum: 1
+          default: 3600
+          description: Maximum delay between retries
+        batchMaxSize: 
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 200
+          description: Max events per webhook POST
+        rateLimitPerMinute: 
+          type: integer
+          minimum: 1
+          default: 600
+          description: Max deliveries per minute
+
+    ProblemDetails:
+      allOf:
+        - $ref: https://api.swaggerhub.com/domains/smartbear-public/ProblemDetails/1.0.0#/components/schemas/ProblemDetails
