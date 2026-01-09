@@ -1,0 +1,267 @@
+openapi: 3.1.0
+info:
+  title: Carrier Shipment Events API
+  version: 1.0.0-public-preview
+  description: |
+    # Overview
+    Carrier-facing APIs for publishing shipment events. 
+    
+    Refer to PRD for more details: [NMFTA In-Transit Visibility API Product Requirements](https://dsdcapis.github.io/full-truckload/api-prds/API%20Product%20Requirements%20-%20In%20Transit%20Visibility.pdf)
+    
+    # Capabilities:
+    - Pull events: GET /v1/events (page-based, deterministic ordering)
+    - Webhook delivery: webhooks/shipmentEvents (EventBatch + HMAC)
+    - Subscription management: /v1/subscriptions
+    - Pagination strategy: Page-Based method with page/pageSize
+    - Standardized event types
+    - Ordering, idempotency, retries
+    - [RFC 7807 Problem Details](https://datatracker.ietf.org/doc/html/rfc7807)
+
+tags:
+  - name: Events
+    description: Pull shipment events
+  - name: Subscriptions
+    description: Manage webhook subscriptions
+
+paths:
+  /v1/events:
+    get:
+      tags: 
+        - Events
+      summary: List shipment events (page-based)
+      operationId: listEvents
+      description: |
+        Returns a page of events. Pagination in headers; body uses EventsPage for consistency.
+        Results are deterministically ordered by `shipmentId`, `sequence`, `id`.      
+      parameters:
+        - in: query
+          name: shipmentId
+          schema: 
+            type: string
+          description: Filter by canonical shipment id.
+        - in: query
+          name: eventTypes
+          schema:
+            type: array
+            items: 
+              $ref: './schemas/schemas.yaml#/components/schemas/EventType'
+          description: One or more event types.
+        - in: query
+          name: occurredFrom
+          schema: 
+            type: string
+            format: date-time
+          description: occurredAt >= this timestamp.
+        - in: query
+          name: occurredTo
+          schema: 
+            type: string
+            format: date-time
+          description: occurredAt < this timestamp.
+        - in: query
+          name: page
+          schema: 
+            type: integer
+            minimum: 1
+            default: 1
+          description: 1-based page index.
+        - in: query
+          name: pageSize
+          schema: 
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+          description: Results per page.
+        - in: query
+          name: order
+          schema: 
+            type: string
+            enum:
+               - asc
+               - desc
+            default: asc
+          description: Sort direction on `shipmentId`, `sequence`, `id`.
+        - in: header
+          name: X-Request-Id
+          schema: 
+            type: string
+          description: Optional caller-provided id for tracing.
+      responses:
+        '200':
+          description: A page of events
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/EventsPage'
+        'default': 
+          $ref: './schemas/schemas.yaml#/components/responses/UnexpectedError'
+
+  /v1/subscriptions:
+    get:
+      tags: 
+        - Subscriptions
+      summary: List subscriptions
+      operationId: listSubscriptions
+      description: |
+        Returns a page of subscriptions. Pagination in headers; body uses SubscriptionsPage for consistency.
+        Results are deterministically ordered by `id`.      
+      parameters:
+        - in: query
+          name: status
+          schema: 
+            type: string
+            enum: 
+              - active
+              - paused
+              - inactive
+            default: active
+        - in: query
+          name: page
+          schema: 
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: pageSize
+          schema: 
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        '200':
+          description: Subscriptions page
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/SubscriptionsPage'
+        'default': 
+          $ref: './schemas/schemas.yaml#/components/responses/UnexpectedError'
+
+    post:
+      tags: 
+        - Subscriptions
+      summary: Create a subscription
+      operationId: createSubscription
+      description: |
+        Create a subscription to receive in-transit events via webhook. 
+        Provide the delivery configuration webhook url and hmac_secret_id  and filters event_types and shipment IDs. 
+        Returns the created Subscription on success.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: './schemas/schemas.yaml#/components/schemas/SubscriptionCreate'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              $ref: './schemas/schemas.yaml#/components/headers/Location'
+          content:
+            application/json:
+              schema: 
+                $ref: './schemas/schemas.yaml#/components/schemas/Subscription'
+        'default': 
+          $ref: './schemas/schemas.yaml#/components/responses/UnexpectedError'
+
+  /v1/subscriptions/{subscriptionId}:
+    get:
+      tags: 
+        - Subscriptions
+      summary: Get a subscription
+      operationId: getSubscription
+      description: |
+        Retrieve a single subscription by its unique ID.
+        Returns the subscription's current configuration and status.
+      parameters:
+        - in: path
+          name: subscriptionId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: The subscription that matches the provided subscription ID.
+          content:
+            application/json:
+              schema: 
+                $ref: './schemas/schemas.yaml#/components/schemas/Subscription'
+        'default': 
+          $ref: './schemas/schemas.yaml#/components/responses/UnexpectedError'
+
+    patch:
+      tags: 
+        - Subscriptions
+      summary: Update a subscription (merge-patch)
+      operationId: updateSubscription
+      description: Partial update using [JSON Merge Patch](https://datatracker.ietf.org/doc/html/rfc7386). Provide only fields you want to change.      
+      parameters:
+        - in: path
+          name: subscriptionId
+          required: true
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: './schemas/schemas.yaml#/components/schemas/SubscriptionPatch'
+      responses:
+        '200':
+          description: Updated subscription
+          content:
+            application/json:
+              schema: 
+                $ref: './schemas/schemas.yaml#/components/schemas/Subscription'
+        'default': 
+          $ref: './schemas/schemas.yaml#/components/responses/UnexpectedError'
+
+    delete:
+      tags: 
+        - Subscriptions
+      summary: Delete a subscription
+      operationId: deleteSubscription
+      description: Delete a subscription by its unique ID. Stops future deliveries and removes the subscription.
+      parameters:
+        - in: path
+          name: subscriptionId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '204':
+          description: Deleted
+        'default': 
+          $ref: './schemas/schemas.yaml#/components/responses/UnexpectedError'
+
+webhooks:
+  shipmentEvents:
+    post:
+      summary: Shipment events webhook (from Carrier -> Subscriber)
+      description: |
+        We POST batches of events to your configured `endpointUrl`.
+        Verify the HMAC signature using your shared secret.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: './schemas/schemas.yaml#/components/schemas/EventBatch'
+      parameters:
+        - in: header
+          name: X-Signature
+          required: true
+          schema: 
+            type: string
+          description: HMAC-SHA256 base64 signature over the raw body using your shared secret.
+      responses:
+        '200': 
+          description: Acknowledged (no retry)
+        '202': 
+          description: Accepted (no retry)
+        'default': 
+          $ref: './schemas/schemas.yaml#/components/responses/UnexpectedError'
