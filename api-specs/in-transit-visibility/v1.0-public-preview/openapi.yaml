@@ -82,11 +82,6 @@ paths:
                - desc
             default: asc
           description: Sort direction on `shipmentId`, `sequence`, `id`.
-        - in: header
-          name: X-Request-Id
-          schema: 
-            type: string
-          description: Optional caller-provided id for tracing.
       responses:
         '200':
           description: A page of events
@@ -244,20 +239,12 @@ webhooks:
       summary: Shipment events webhook (from Carrier -> Subscriber)
       description: |
         We POST batches of events to your configured `endpointUrl`.
-        Verify the HMAC signature using your shared secret.
       requestBody:
         required: true
         content:
           application/json:
             schema: 
               $ref: './schemas/schemas.yaml#/components/schemas/EventBatch'
-      parameters:
-        - in: header
-          name: X-Signature
-          required: true
-          schema: 
-            type: string
-          description: HMAC-SHA256 base64 signature over the raw body using your shared secret.
       responses:
         '200': 
           description: Acknowledged (no retry)
