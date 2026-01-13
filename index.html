@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>API Documentation Index</title>
+</head>
+<style>
+   body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+    p {
+        max-width: 720px;
+        line-height: 1.6;
+    }
+    img.logo {
+        max-height: 100px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    .tree {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    .tree ul {
+        list-style-type: none;
+        padding-left: 20px;
+        margin: 0;
+    }
+    .tree li {
+        margin: 3px 0;
+        position: relative;
+    }
+    .folder {
+        font-weight: bold;
+        color: #333;
+        cursor: pointer;
+        user-select: none;
+    }
+    .folder::before {
+        content: '📁 ';
+        margin-right: 5px;
+    }
+    .folder.collapsed::before {
+        content: '📂 ';
+    }
+    .file-link {
+        text-decoration: none;
+        padding: 2px 4px;
+        border-radius: 3px;
+        transition: background-color 0.2s;
+    }
+    .file-link:hover {
+        background-color: #f0f0f0;
+    }
+    .pdf-link {
+        color: #d9534f;
+    }
+    .pdf-link::before {
+        content: '📄 ';
+        margin-right: 5px;
+    }
+    .openapi-link {
+        color: #5bc0de;
+    }
+    .openapi-link::before {
+        content: '📋 ';
+        margin-right: 5px;
+    }
+    .toggle {
+        display: inline-block;
+        width: 16px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        margin-right: 3px;
+    }
+    .hidden {
+        display: none;
+    }
+    img.logo {
+        max-height: 100px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+</style>
+<body>
+    <img class=logo src=images/DSDC-Truckload.svg alt=Company Logo>
+    <p>Supported by the Digital Standard Development Council's (DSDC) Digital FTL Council, these API standards help organizations modernize FTL workflows through standardized, open, and scalable integration.</p>
+    <h1>API Documentation Index</h1>
+    <ul class="tree" id="root">
+        <li>
+            <span class="toggle" onclick="toggleFolder(this)">▼</span>
+            <span class="folder">api-prds</span>
+            <ul>
+            <li><a class="file-link pdf-link" href="api-prds/API Product Requirements - Book Tender.pdf" target="_blank">API Product Requirements - Book Tender.pdf</a></li>
+            <li><a class="file-link pdf-link" href="api-prds/API Product Requirements - In Transit Visibility.pdf" target="_blank">API Product Requirements - In Transit Visibility.pdf</a></li>
+            <li><a class="file-link pdf-link" href="api-prds/API Product Requirements - Invoice Documents.pdf" target="_blank">API Product Requirements - Invoice Documents.pdf</a></li>
+            <li><a class="file-link pdf-link" href="api-prds/API Product Requirements - Rate Quote.pdf" target="_blank">API Product Requirements - Rate Quote.pdf</a></li>
+            <li><a class="file-link pdf-link" href="api-prds/API Product Requirements - eBOL.pdf" target="_blank">API Product Requirements - eBOL.pdf</a></li>
+            </ul>
+        </li>
+        <li>
+            <span class="toggle" onclick="toggleFolder(this)">▼</span>
+            <span class="folder">api-scopes</span>
+            <ul>
+            <li><a class="file-link pdf-link" href="api-scopes/API Scope - Invoice Documents.pdf" target="_blank">API Scope - Invoice Documents.pdf</a></li>
+            <li><a class="file-link pdf-link" href="api-scopes/API Scope - eBOL.pdf" target="_blank">API Scope - eBOL.pdf</a></li>
+            </ul>
+        </li>
+        <li>
+            <span class="toggle" onclick="toggleFolder(this)">▼</span>
+            <span class="folder">api-specs</span>
+            <ul>
+            <li>
+                <span class="toggle" onclick="toggleFolder(this)">▼</span>
+                <span class="folder">ebol</span>
+                <ul>
+                <li><a class="file-link openapi-link" href="api-specs/ebol/v1.0-public-preview/index.html">v1.0-public-preview (OpenAPI)</a></li>
+                </ul>
+            </li>
+            <li>
+                <span class="toggle" onclick="toggleFolder(this)">▼</span>
+                <span class="folder">in-transit-visibility</span>
+                <ul>
+                <li><a class="file-link openapi-link" href="api-specs/in-transit-visibility/v1.0-public-preview/index.html">v1.0-public-preview (OpenAPI)</a></li>
+                </ul>
+            </li>
+            <li>
+                <span class="toggle" onclick="toggleFolder(this)">▼</span>
+                <span class="folder">invoice-and-documents</span>
+                <ul>
+                <li><a class="file-link openapi-link" href="api-specs/invoice-and-documents/v1.0-public-preview/index.html">v1.0-public-preview (OpenAPI)</a></li>
+                </ul>
+            </li>
+            </ul>
+        </li>
+    </ul>
+    <script>
+        function toggleFolder(toggle) {
+            const li = toggle.parentElement;
+            const ul = li.querySelector('ul');
+            if (ul) {
+                ul.classList.toggle('hidden');
+                toggle.textContent = ul.classList.contains('hidden') ? '▶' : '▼';
+            }
+        }
+        
+        // Optional: Add expand/collapse all functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const folders = document.querySelectorAll('.folder');
+            folders.forEach(folder => {
+                folder.addEventListener('dblclick', function(e) {
+                    const toggle = this.previousElementSibling;
+                    if (toggle && toggle.classList.contains('toggle')) {
+                        toggleFolder(toggle);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
