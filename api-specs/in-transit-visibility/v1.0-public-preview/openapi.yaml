@@ -1,10 +1,17 @@
 openapi: 3.1.0
 info:
-  title: Carrier Shipment Events API
+  title: In-Transit Visibility API
   version: 1.0.0-public-preview
   description: |
     # Overview
-    Carrier-facing APIs for publishing shipment events. 
+    In-Transit Visibility is the capability to track freight movements through milestones, events and 
+    location updates in real time, from pickup to delivery. It is vital to the lifecycle of a load because
+    it provides insight into where a shipment is at each stage and alerts all parties of important
+    milestones or issues. This capability ties into the broader Digital Standards Development
+    Council open API standards initiative, which aims to digitize data exchange in freight
+    transportation. By adopting standard APIs, the industry can reduce manual processes, improve
+    data accuracy, increase visibility into shipments, enable real-time notifications of shipment
+    changes, and drive process automation.
     
     Refer to PRD for more details: [NMFTA In-Transit Visibility API Product Requirements](https://dsdcapis.github.io/full-truckload/api-prds/API%20Product%20Requirements%20-%20In%20Transit%20Visibility.pdf)
     
