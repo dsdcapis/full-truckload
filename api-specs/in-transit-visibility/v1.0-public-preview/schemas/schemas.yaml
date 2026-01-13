@@ -24,6 +24,7 @@ components:
 
   schemas:
     EventsPage:
+      title: Events Page
       type: object
       properties:
         data:
@@ -47,6 +48,7 @@ components:
         - pageSize
 
     EventBatch:
+      title: Event Batch
       type: object
       description: Batch delivery of events for webhook posts.
       properties:
@@ -68,6 +70,7 @@ components:
         - events
 
     Event:
+      title: Event
       type: object
       description: Standardized shipment event
       properties:
@@ -128,6 +131,7 @@ components:
         - sequence
 
     EventType:
+      title: Event Type
       type: string
       description: Normalized event taxonomy across modes.
       enum:
@@ -158,6 +162,7 @@ components:
       default: OTHER
 
     Shipment:
+      title: Shipment
       type: object
       properties:
         shipmentId:
@@ -196,6 +201,7 @@ components:
         - destination
 
     TransportationMode:
+      title: Transportation Mode
       type: string
       enum:
         - FTL
@@ -209,6 +215,7 @@ components:
       default: OTHER
 
     Location:
+      title: Location
       type: object
       properties:
         locationId:
@@ -248,6 +255,7 @@ components:
           type: string
 
     SubscriptionsPage:
+      title: Subscriptions Page
       type: object
       properties:
         data:
@@ -268,6 +276,7 @@ components:
         - pageSize
 
     SubscriptionBase:
+      title: Subscription Base
       type: object
       properties:
         endpointUrl: 
@@ -292,6 +301,7 @@ components:
           $ref: '#/components/schemas/DeliveryMetadata'
 
     Subscription:
+      title: Subscription
       allOf:
         - $ref: '#/components/schemas/SubscriptionBase'
         - type: object
@@ -320,6 +330,7 @@ components:
       unevaluatedProperties: false
 
     SubscriptionCreate:
+      title: Subscription Create
       allOf:
         - $ref: '#/components/schemas/SubscriptionBase'
         - type: object
@@ -329,6 +340,7 @@ components:
       unevaluatedProperties: false          
 
     SubscriptionPatch:
+      title: Subscription Patch
       allOf:
         - $ref: '#/components/schemas/SubscriptionBase'
         - type: object
@@ -343,6 +355,7 @@ components:
       unevaluatedProperties: false            
 
     DeliveryMetadata:
+      title: Delivery Metadata
       type: object
       properties:
         maxAttempts: 
@@ -373,5 +386,6 @@ components:
           description: Max deliveries per minute
 
     ProblemDetails:
+      title: Problem Details
       allOf:
         - $ref: https://api.swaggerhub.com/domains/smartbear-public/ProblemDetails/1.0.0#/components/schemas/ProblemDetails
