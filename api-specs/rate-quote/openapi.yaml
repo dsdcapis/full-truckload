@@ -54,4 +54,4 @@ paths:
                 $ref: './schemas/schema.yaml#/components/schemas/RateQuoteResponse'
         '404':
           description: Rate Quote Id not found
-  
+
