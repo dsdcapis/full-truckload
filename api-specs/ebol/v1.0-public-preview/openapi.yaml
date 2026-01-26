@@ -37,45 +37,51 @@ info:
 
     # Value Proposition
 
-    - **Shipper:** The eBOL API will allow a Shipper to more easily share the official details of a
-      shipment, reducing opportunities for misunderstanding, human error, and theft. With
-      existing BOL processes, particularly for a LTL shipment, a Shipper does not have
-      visibility to the PRO number or shipment status until Pickup occurs. With the eBOL API,
-      the Shipper will receive the PRO number pre-pickup, and in conjunction with other
-      standard APIs, will be able to receive pre-pickup visibility on their loads.
+    ## Shipper
+    
+    The eBOL API will allow a Shipper to more easily share the official details of a
+    shipment, reducing opportunities for misunderstanding, human error, and theft. With
+    existing BOL processes, particularly for a LTL shipment, a Shipper does not have
+    visibility to the PRO number or shipment status until Pickup occurs. With the eBOL API,
+    the Shipper will receive the PRO number pre-pickup, and in conjunction with other
+    standard APIs, will be able to receive pre-pickup visibility on their loads.
       
-      Additionally, current processes leave open the possibility for theft when bad actors
-      manipulate physical BOL’s to hide evidence of theft, and makes it difficult for Shippers
-      to prove otherwise. An electronic BOL process will reduce these opportunities and give
-      Shipper’s peace of mind.
+    Additionally, current processes leave open the possibility for theft when bad actors
+    manipulate physical BOL's to hide evidence of theft, and makes it difficult for Shippers
+    to prove otherwise. An electronic BOL process will reduce these opportunities and give
+    Shipper's peace of mind.
 
-      A Shipper will initiate the eBOL process by sending the details of their shipment to a
-      Carrier using the standard API format. They will receive back from the Carrier a
-      completed BOL and shipping label. The response will also include a unique shipment
-      identifier (PRO in the case of an LTL shipment) that can be used to reference the
-      shipment in future interactions with the Carrier, including tracking update requests.
+    A Shipper will initiate the eBOL process by sending the details of their shipment to a
+    Carrier using the standard API format. They will receive back from the Carrier a
+    completed BOL and shipping label. The response will also include a unique shipment
+    identifier (PRO in the case of an LTL shipment) that can be used to reference the
+    shipment in future interactions with the Carrier, including tracking update requests.
 
-    - **Carrier:** The eBOL API will be especially beneficial to the Carrier community by
-      outlining the standard communication protocol for sharing BOL information, greatly
-      simplifying the connectivity required to do business with a large number of shippers,
-      customers, and third parties. Among other things this will improve billing accuracy,
-      reduce opportunity for manual errors, and allow Carriers to provide better service to
-      customers.
+    ## Carrier 
+    
+    The eBOL API will be especially beneficial to the Carrier community by
+    outlining the standard communication protocol for sharing BOL information, greatly
+    simplifying the connectivity required to do business with a large number of shippers,
+    customers, and third parties. Among other things this will improve billing accuracy,
+    reduce opportunity for manual errors, and allow Carriers to provide better service to
+    customers.
 
-      A Carrier will receive details of a shipment via the eBOL API from the Shipper, store the
-      information in their system, and return the official BOL back to the Shipper. They will
-      also return a shipping label that the Shipper can print and attach to their shipment. As
-      part of this, they will also return a unique load identifier (in the case of an LTL shipment,
-      it will be the PRO number) back to the Shipper that can be used to reference their load
-      going forward.
+    A Carrier will receive details of a shipment via the eBOL API from the Shipper, store the
+    information in their system, and return the official BOL back to the Shipper. They will
+    also return a shipping label that the Shipper can print and attach to their shipment. As
+    part of this, they will also return a unique load identifier (in the case of an LTL shipment,
+    it will be the PRO number) back to the Shipper that can be used to reference their load
+    going forward.
 
-    - **3rd Party:** The eBOL API will allow third parties of all kinds to receive and send the
-      necessary shipment information to ensure a seamless flow through the life cycle of a
-      shipment. Due to the nature of 3rd parties’ business and having to interact with multiple
-      parties in the transportation industry, 3rd parties stand much to gain by simplification of
-      their business processes, which the eBOL will enable.
+    ## 3rd Party
+    
+    The eBOL API will allow third parties of all kinds to receive and send the
+    necessary shipment information to ensure a seamless flow through the life cycle of a
+    shipment. Due to the nature of 3rd parties' business and having to interact with multiple
+    parties in the transportation industry, 3rd parties stand much to gain by simplification of
+    their business processes, which the eBOL will enable.
 
-    ## LTL
+    # LTL
 
     In the LTL industry, the BOL is a particularly valuable document due to the inherent
     complexities of an LTL shipment. Not only does an LTL BOL contain general shipment
@@ -88,7 +94,7 @@ info:
     industry. Its usage is being adopted by Shippers, Carriers, and 3PLs, and is being put to use to
     drive efficiency and automation for LTL shipments.
     
-    ## FTL
+    # FTL
 
     The BOL for a Full Truckload shipment serves the same purpose and contains similar
     information to that of an LTL shipment. The main difference between a FTL and LTL is the level
