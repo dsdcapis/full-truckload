@@ -2,6 +2,12 @@ openapi: 3.1.0
 info:
   title: In-Transit Visibility API
   version: 1.0.0-public-preview
+  contact:
+    name: DSDC APIs Full Truckload
+    url: https://github.com/dsdcapis/full-truckload
+  license:
+    name: DSDC Repository License
+    url: https://github.com/dsdcapis/full-truckload/blob/main/LICENSE.md
   description: |
     # Overview
     In-Transit Visibility is the capability to track freight movements through milestones, events and 
@@ -12,10 +18,33 @@ info:
     transportation. By adopting standard APIs, the industry can reduce manual processes, improve
     data accuracy, increase visibility into shipments, enable real-time notifications of shipment
     changes, and drive process automation.
+
+    Shippers today continue to demand real-time updates at every key milestone - before pickup,
+    during transit, and upon arrival. In response, industry leaders are making automated digital
+    tracking a core part of operations, replacing phone calls and emails with API-based status
+    sharing. This broad industry trend underscores how critical in-transit visibility has become. It
+    also reinforces the NMFTA's mission to standardize visibility.
+
+    By implementing this API, all parties - shippers, carriers, and intermediaries - share a single
+    source of truth about a load's status. In-transit updates, when combined with other NMFTA
+    standard APIs (e.g. electronic tendering and eBOL), form a continuous digital thread from load
+    creation to completion, greatly enhancing transparency and efficiency in freight movements.    
+    # Value Proposition
+
+    ## Shipper
     
-    Refer to PRD for more details: [NMFTA In-Transit Visibility API Product Requirements](https://dsdcapis.github.io/full-truckload/api-prds/API%20Product%20Requirements%20-%20In%20Transit%20Visibility.pdf)
+    Gaining in-transit visibility allows shippers to easily get updates on the status and location of their shipments, reducing misunderstandings, human error, and theft. For example, instead of waiting for manual updates, a shipper can see when a load is picked up, in transit, or delayed, and even receive location updates before pickup occurs. This proactive insight gives shippers peace of mind and the ability to address exceptions quickly.
+
+    ## Carrier
     
+    The In-Transit Visibility API allows carriers to provide digital status updates to relevant parties using a standard protocol. This approach enables tracking information to be shared with shippers and third-party logistics providers (3PLs), supporting automated communication of updates such as departure, arrival, or delay notifications, and contributing to operational transparency.
+    
+    ## 3rd Party
+    
+    The In-Transit Visibility API will allow third parties of all kinds to receive and send necessary shipment information to ensure a seamless flow through the life cycle of a shipment. Due to the nature of their business and having to interact with multiple parties in the transportation industry, they stand much to gain by simplification of their business processes, which the In-Transit Visibility specification will enable. Overall, the In-Transit Visibility standard helps 3rd parties coordinate more effectively and provide better service with less overhead.
+
     # Capabilities:
+
     - Pull events: GET /v1/events (page-based, deterministic ordering)
     - Webhook delivery: webhooks/shipmentEvents (EventBatch + HMAC)
     - Subscription management: /v1/subscriptions
@@ -24,6 +53,9 @@ info:
     - Ordering, idempotency, retries
     - [RFC 7807 Problem Details](https://datatracker.ietf.org/doc/html/rfc7807)
 
+    # Product Requirements Document (PRD)
+
+    The Product Requirements Document (PRD) for this API can be found [here](https://dsdcapis.github.io/full-truckload/api-prds/API%20Product%20Requirements%20-%20In%20Transit%20Visibility.pdf).
 tags:
   - name: Events
     description: Pull shipment events
