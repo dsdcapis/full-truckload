@@ -47,9 +47,9 @@ info:
     standard APIs, will be able to receive pre-pickup visibility on their loads.
       
     Additionally, current processes leave open the possibility for theft when bad actors
-    manipulate physical BOL's to hide evidence of theft, and makes it difficult for Shippers
+    manipulate physical BOLs to hide evidence of theft, and makes it difficult for Shippers
     to prove otherwise. An electronic BOL process will reduce these opportunities and give
-    Shipper's peace of mind.
+    Shippers peace of mind.
 
     A Shipper will initiate the eBOL process by sending the details of their shipment to a
     Carrier using the standard API format. They will receive back from the Carrier a
@@ -61,7 +61,7 @@ info:
     
     The eBOL API will be especially beneficial to the Carrier community by
     outlining the standard communication protocol for sharing BOL information, greatly
-    simplifying the connectivity required to do business with a large number of shippers,
+    simplifying the connectivity required to do business with a large number of Shippers,
     customers, and third parties. Among other things this will improve billing accuracy,
     reduce opportunity for manual errors, and allow Carriers to provide better service to
     customers.
