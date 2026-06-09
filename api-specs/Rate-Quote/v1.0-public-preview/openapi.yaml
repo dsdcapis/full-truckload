@@ -1,0 +1,826 @@
+openapi: 3.1.0
+info:
+  title: Rate Quote API
+  version: 1.0.0
+  description: This file contains the schema definitions for the Full Truckload (FTL) Rate Quote API
+
+paths:
+  /v1/ratequote/app:
+    post:
+      tags:
+        - Rate Quote API Standards
+      summary: Create a rate quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RateQuoteRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateQuoteResponse'
+
+  /v1/ratequote/app/{quoteId}:
+    get:
+      tags:
+        - Rate Quote API Standards
+      summary: Get a rate quote
+      operationId: getRateQuoteById
+      parameters:
+        - name: quoteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateQuoteResponse'
+
+
+components:
+  schemas:
+    # Main request schema
+    RateQuoteRequest:
+      title: FTL Rate Quote Request
+      type: object
+      required:
+        - pickupDate
+        - address
+      properties:
+        customerId:
+          type: string
+          examples: [CRN12345]
+        customerName:
+          type: string
+          examples: [Bob]
+        pickupDate:
+          $ref: '#/components/schemas/FlexibleDate'
+        deliveryDate:
+          $ref: '#/components/schemas/FixedDate'
+        mode:
+          type: array
+          minItems: 1
+          description: One or more transportation modes for which a rate quote is requested.
+          items:
+            $ref: '#/components/schemas/TransportationMode'
+          examples:
+            - [FTL]
+        address:
+          type: array
+          minItems: 2
+          items:
+            $ref: '#/components/schemas/Address'
+          examples:
+                [
+                  {
+                    "stopType": "Origin",
+                    "sequenceNumber": 1,
+                    "name": "Company Name",
+                    "address1": "123 Main St",
+                    "address2": "Block 2",
+                    "city": "Chicago",
+                    "state": "IL",
+                    "country": "USA",
+                    "postalCode": "60601",
+                    "commodities": [
+                      {
+                        "operation" : "PICKUP",
+                        "classification": "50",
+                        "description": "Electronics",
+                        "quantity": 10,
+                        "weight": 500,
+                        "weightUnit": "Pounds",
+                        "height": 12,
+                        "length": 15,
+                        "width": 10,
+                        "dimensionsUnit": "Inches",
+                        "stackable": false,
+                        "hazardous": false
+                      }
+                    ]
+                  },
+                  {
+                    "stopType": "Intermediate",
+                    "sequenceNumber": 2,
+                    "name": "Company Name",
+                    "address1": "123 Main St",
+                    "city": "Roger",
+                    "state": "AR",
+                    "country": "USA",
+                    "postalCode": "72758",
+                    "commodities": [
+                      {
+                        "operation" : "PICKUP",
+                        "classification": "50",
+                        "description": "Electronics",
+                        "quantity": 2,
+                        "weight": 100,
+                        "weightUnit": "Pounds",
+                        "height": 5,
+                        "length": 10,
+                        "width": 10,
+                        "dimensionsUnit": "Inches",
+                        "stackable": false,
+                        "hazardous": false
+                      }
+                    ]
+                  },
+                  {
+                    "stopType": "Destination",
+                    "sequenceNumber": 3,
+                    "name": "Company Name",
+                    "address1": "789 Main St",
+                    "city": "Dallas",
+                    "state": "TX",
+                    "country": "USA",
+                    "postalCode": "75056",
+                    "commodities": [
+                      {
+                        "operation" : "DROP",
+                        "classification": "50",
+                        "description": "Electronics",
+                        "quantity": 10,
+                        "weight": 500,
+                        "weightUnit": "Pounds",
+                        "height": 12,
+                        "length": 15,
+                        "width": 10,
+                        "dimensionsUnit": "Inches",
+                        "stackable": false,
+                        "hazardous": false
+                      },
+                      {
+                        "operation" : "DROP",
+                        "classification": "50",
+                        "description": "Electronics",
+                        "quantity": 2,
+                        "weight": 100,
+                        "weightUnit": "Pounds",
+                        "height": 5,
+                        "length": 10,
+                        "width": 10,
+                        "dimensionsUnit": "Inches",
+                        "stackable": false,
+                        "hazardous": false
+                      }
+                    ]
+                  }
+                ]
+        referenceNumbers:
+          $ref: '#/components/schemas/ReferenceNumbers'
+        shipmentTotals:
+          $ref: '#/components/schemas/ShipmentTotals'
+        ratingContextAdditionalServices:
+          type: array
+          description: >
+            Additional contextual information provided by the requester to
+            communicate specific requirements or considerations for the shipment.
+            This information helps the carrier understand special needs that may result in adjusted rates or additional charges.
+          items:
+            $ref: '#/components/schemas/RatingContextAccessorialsRequest'
+          examples:
+            - [
+                { "key": "LIFTGATE", "context": "Liftgate Service", "value": "Y" }
+              ]
+        equipment:
+          $ref: '#/components/schemas/Equipment'
+        payment:
+          $ref: '#/components/schemas/Payment'
+
+    # Main response schema
+    RateQuoteResponse:
+      title: FTL Rate Quote Response
+      type: object
+      properties:
+        uniqueQuoteReferenceId:
+          type: string
+          examples: [SID9743985]
+        carrierResult:
+          type: array
+          items:
+            $ref: '#/components/schemas/CarrierResult'
+        messageStatus:
+          $ref: '#/components/schemas/MessageStatus'
+
+    RatingContextAccessorialsRequest:
+      title: Rating Context Additional Service (Request)
+      type: object
+      description: >
+        Key/value pairs supplied by the requester that may affect rating.
+        The set of supported additional services is extensible; new keys may be added in the future.
+      properties:
+        key:
+          type: string
+          description: |
+            Context key (extensible). Known request additional service keys include:
+            - LINEHAUL (Line Haul)
+            - FUEL (Fuel Surcharge)
+            - STOP_OFF (Stop-Off Charge)
+            - INSIDE_PICKUP (Inside Pickup)
+            - INSIDE_DELIVERY (Inside Delivery)
+            - RESIDENTIAL (Residential Delivery)
+            - LIMITED_ACCESS (Limited Access)
+            - APPOINTMENT (Appointment Required)
+            - LIFTGATE (Liftgate Service)
+            - DRIVER_ASSIST (Driver Assist)
+            - CONSIGNEE_UNLOAD (Consignee Unload)
+            - REFRIGERATION (Refrigeration / Temp Control)
+            - PROTECT_FREEZE (Protect From Freeze)
+            - HAZMAT (Hazardous Materials)
+            - TANKER_ENDORSEMENT (Tanker Endorsement)
+            - EXPEDITED (Expedited Service)
+            - TANKER_ENDORSED_DRIVER (Tanker Endorsed Driver)
+            - TEAM_DRIVER (Team Driver)
+            - STF (STF)
+            - DROP_ORIGIN (Drop at Origin)
+            - DROP_DROP (Drop and Drop)
+          examples: [RESIDENTIAL]
+        context:
+          type: string
+          description: Human-readable label/description for the key (extensible).
+          examples: [Residential Delivery]
+        value:
+          type: string
+          description: Value associated with the contextual attribute.
+          examples: [Y]
+      required:
+        - key
+        - value
+
+    RatingContextAccessorialsResponse:
+      title: Rating Context Additional Service (Response)
+      type: object
+      description: >
+        Key/value pairs returned by the carrier/rating engine. The set of additional services is extensible;
+        new keys may be added in the future.
+      properties:
+        key:
+          type: string
+          description: |
+            Context key (extensible). Known response additional service keys include:
+            - LINEHAUL (Line Haul)
+            - FUEL (Fuel Surcharge)
+            - STOP_OFF (Stop-Off Charge)
+            - INSIDE_PICKUP (Inside Pickup)
+            - INSIDE_DELIVERY (Inside Delivery)
+            - RESIDENTIAL (Residential Delivery)
+            - LIMITED_ACCESS (Limited Access)
+            - APPOINTMENT (Appointment Required)
+            - LIFTGATE (Liftgate Service)
+            - DRIVER_ASSIST (Driver Assist)
+            - CONSIGNEE_UNLOAD (Consignee Unload)
+            - REFRIGERATION (Refrigeration / Temp Control)
+            - PROTECT_FREEZE (Protect From Freeze)
+            - HAZMAT (Hazardous Materials)
+            - TANKER_ENDORSEMENT (Tanker Endorsement)
+            - CROSSBORDER (Import / Export)
+            - CALIFORNIA_COMPLIANCE (CA Compliance)
+            - DOCUMENTATION (Documentation Fee)
+            - EXPEDITED (Expedited Service)
+            - MISC (Miscellaneous Charges)
+            - TANKER_ENDORSED_DRIVER (Tanker Endorsed Driver)
+            - TEAM_DRIVER (Team Driver)
+            - STF (STF)
+            - DROP_ORIGIN (Drop at Origin)
+            - DROP_DROP (Drop and Drop)
+          examples: [CROSSBORDER]
+        context:
+          type: string
+          description: Human-readable label/description for the key (extensible).
+          examples: [Import / Export]
+        value:
+          type: string
+          description: Value associated with the contextual attribute.
+          examples: [Y]
+      required:
+        - key
+        - value
+
+    FlexibleDate:
+      type: object
+      required:
+        - type
+        - startDate
+        - endDate
+      properties:
+        type:
+          const: FLEXIBLE
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+
+    FixedDate:
+      type: object
+      required:
+        - type
+        - startDate
+      properties:
+        type:
+          const: FIXED
+        startDate:
+          type: string
+          format: date
+
+    # Address schemas
+    Address:
+      type: object
+      description: >
+        Represents a stop in the shipment, which can be Origin, Intermediate, or Destination.
+        Includes address details, contact info, and commodities at this stop.
+      required:
+        - stopType
+        - sequenceNumber
+        - country
+        - postalCode
+      properties:
+        stopType:
+          type: string
+          enum: [Origin, Intermediate, Destination]
+          examples: [Origin]
+        sequenceNumber:
+          type: integer
+        name:
+          type: string
+          examples: [Company Name]
+        address1:
+          type: string
+          examples: [123 Main St]
+        address2:
+          type: string
+        city:
+          type: string
+          examples: [Chicago]
+        state:
+          $ref: '#/components/schemas/StateProvinceCodes'
+        country:
+          $ref: '#/components/schemas/CountryCodes'
+        postalCode:
+          type: string
+          examples: ['60601']
+          description: >
+            The 5-digit + 4 or 5-digit for the United States, 5-digit for Mexico, or 6-character for Canada, postal code
+
+            Valid formats:
+              * 12345-1234 (5 digits + 4 - USA)
+              * 12345 (5 digits - USA/MEX)
+              * A1A1A1 (6 characters - CAN)
+              * A1A1A (5 characters - CAN)
+        commodities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Commodity'
+
+
+    CarrierResult:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/TransportationMode'
+        equipmentType:
+          $ref: '#/components/schemas/EquipmentType'
+        quote:
+          $ref: '#/components/schemas/Quote'
+        ratingContextAdditionalServices:
+          type: array
+          description: >
+            Contextual values returned by the carrier/rating engine. This may include
+            interpreted additional services or other rating-relevant attributes based on the request.
+          items:
+            $ref: '#/components/schemas/RatingContextAccessorialsResponse'
+          examples:
+            - [
+                { "key": "LINEHAUL", "context": "Line Haul", "value": "Y" },
+                { "key": "FUEL", "context": "Fuel Surcharge", "value": "Y" },
+                { "key": "LIFTGATE", "context": "Liftgate Service","value": "Y"}
+              ]
+        allInclusiveQuote:
+          type: boolean
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Charges'
+          examples:
+            - [
+                {
+                  "code": "LINE_HAUL",
+                  "amount": 1560,
+                  "currency": "USD"
+                },
+                {
+                  "code": "FUEL",
+                  "amount": 536,
+                  "currency": "USD"
+                },
+                {
+                  "code": "LIFTGATE",
+                  "amount": 100,
+                  "currency": "USD"
+                }
+              ]
+
+    Charges:
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/ChargeType'
+          examples: [LINE_HAUL]
+        amount:
+          type: number
+          examples: [1560]
+        currency:
+          $ref: '#/components/schemas/Currency'
+          examples: [USD]
+
+
+    Commodity:
+      type: object
+      required:
+        - operation
+        - quantity
+        - weight
+        - weightUnit
+        - dimensionsUnit
+      properties:
+        operation:
+          type: string
+          description: Operation performed on the commodity at this stop
+          enum:
+            - PICKUP
+            - DROP
+        classification:
+          $ref: '#/components/schemas/ClassificationCodes'
+        description:
+          type: string
+          examples: [Electronics]
+        quantity:
+          type: integer
+          minimum: 1
+          examples: [10]
+        weight:
+          type: number
+          minimum: 0
+          examples: [500]
+        weightUnit:
+          $ref: '#/components/schemas/WeightUnit'
+        height:
+          type: number
+          minimum: 0
+          examples: [12]
+        length:
+          type: number
+          minimum: 0
+          examples: [15]
+        width:
+          type: number
+          minimum: 0
+          examples: [10]
+        dimensionsUnit:
+          $ref: '#/components/schemas/DimensionsUnit'
+        stackable:
+          type: boolean
+          default: false
+          examples: [false]
+        hazardous:
+          type: boolean
+          default: false
+          examples: [false]
+
+
+    ShipmentTotals:
+      type: object
+      required:
+        - totalWeight
+        - weightUnit
+        - totalHeight
+        - totalLength
+        - totalWidth
+        - totalPieces
+        - dimensionsUnit
+      properties:
+        totalWeight:
+          type: number
+          minimum: 0
+          examples: [500]
+        weightUnit:
+          $ref: '#/components/schemas/WeightUnit'
+        totalHeight:
+          type: number
+          minimum: 0
+          examples: [50]
+        totalLength:
+          type: number
+          minimum: 0
+          examples: [50]
+        totalWidth:
+          type: number
+          minimum: 0
+          examples: [50]
+        totalPieces:
+          type: integer
+          minimum: 1
+          examples: [10]
+        dimensionsUnit:
+          $ref: '#/components/schemas/DimensionsUnit'
+
+    Equipment:
+      type: object
+      properties:
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/EquipmentType'
+          examples:
+            [DRYVAN, FLATBED]
+        temperatureControlled:
+          type: boolean
+          default: false
+          examples: [false]
+        temperatureMin:
+          type: number
+        temperatureMax:
+          type: number
+        tarpRequired:
+          type: boolean
+          examples: [true]
+
+    ReferenceNumbers:
+      title: Reference Numbers
+      type: object
+      properties:
+        uniqueQuoteReferenceId:
+          type: string
+          description: Unique Reference number used by shipper to get quote.
+          examples: [SID9743985]
+        additionalReferences:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                examples: [Customer Reference Id]
+                description: |
+                  Indicates the name of the reference number being provided.
+              value:
+                type: string
+                examples: [CR12345]
+                description: >-
+                  Additional reference number that correlates to the
+                  additional reference name.
+
+    TransportationMode:
+      title: Transportation Mode
+      type: string
+      examples: [FTL]
+      enum:
+        - FTL
+        - LTL
+        - PARCEL
+        - OCEAN
+        - AIR
+        - RAIL
+        - INTERMODAL
+        - OTHER
+
+
+    ClassificationCodes:
+      title: Classification Codes
+      type: string
+      description: |
+        Valid values:
+        * 50
+        * 55
+        * 60
+        * 65
+        * 70
+        * 77.5
+        * 85
+        * 92.5
+        * 100
+        * 110
+        * 125
+        * 150
+        * 175
+        * 200
+        * 250
+        * 300
+        * 400
+        * 500
+        * Not required
+      enum:
+        - '50'
+        - '55'
+        - '60'
+        - '65'
+        - '70'
+        - '77.5'
+        - '85'
+        - '92.5'
+        - '100'
+        - '110'
+        - '125'
+        - '150'
+        - '175'
+        - '200'
+        - '250'
+        - '300'
+        - '400'
+        - '500'
+        - 'Not required'
+
+    DimensionsUnit:
+      title: Dimensions Unit
+      type: string
+      enum:
+        - Inches
+        - Centimeters
+      default: Inches
+      description: |
+        The unit of measurement for dimensions.
+    WeightUnit:
+      title: Weight Unit
+      type: string
+      enum:
+        - Pounds
+        - Kilograms
+      default: Pounds
+      description: |
+        The unit of measurement for weight.
+    EquipmentType:
+      title: Equipment Type
+      type: string
+      examples: [DRYVAN]
+      enum:
+        - DRYVAN
+        - REEFER
+        - FLATBED
+        - STEPDECK
+        - TANKER
+    StateProvinceCodes:
+      title: State/Province Code
+      examples: [IL]
+      type: string
+      description: |
+        State/province/region code.
+
+        Use ISO 3166-2 subdivision codes (e.g., US states, Canadian provinces/territories, Mexican states).
+        Reference: https://en.wikipedia.org/wiki/ISO_3166-2
+
+    CountryCodes:
+      title: Country Codes
+      type: string
+      examples: [USA]
+      description: |
+        Three-letter country code.
+
+        Use ISO 3166-1 alpha-3 country codes.
+        Reference: https://en.wikipedia.org/wiki/ISO_3166-1
+
+    Payment:
+      type: object
+      properties:
+        terms:
+          type: string
+          description: |
+            Specifies how the payment for the shipment is handled
+
+            Valid values:
+            * Collect      - Payment is collected from the recipient (consignee) at delivery
+            * Prepaid      - Payment is made by the shipper before shipment
+            * Third Party  - Payment is made by a third party (neither shipper nor consignee)
+          enum:
+            - Collect
+            - Prepaid
+            - Third Party
+
+        payers:
+          type: string
+          description: |
+            Specifies who is responsible for making the payment
+
+            Valid values:
+            * Consignee    - The receiver of the shipment pays
+            * Shipper      - The sender of the shipment pays
+            * Third Party  - A third party pays on behalf of shipper or consignee
+          enum:
+            - Consignee
+            - Shipper
+            - Third Party
+
+    Quote:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [SPOT, CONTRACT]
+          examples: [CONTRACT]
+        id:
+          type: string
+          examples: [12345678]
+        quoteValidFrom:
+          type: string
+          format: date
+          description: >
+            The date from which this quoted rate becomes effective.
+            The rate is not applicable for shipments tendered before this date.
+            For SPOT quotes, this is typically the date the quote was issued.
+            For CONTRACT quotes, this reflects the start of the contracted rate period.
+          examples: ['2026-01-20']
+        quoteValidUntil:
+          type: string
+          format: date
+          description: >
+            The date on which this quoted rate expires.
+            The rate is not applicable for shipments tendered after this date.
+            For SPOT quotes, this is typically 24-72 hours from issuance.
+            For CONTRACT quotes, this reflects the end of the contracted rate period.
+          examples: ['2026-04-20']
+
+    Currency:
+      title: Currency
+      type: string
+      description: |
+        Valid values:
+        * CAD
+        * MXN
+        * USD
+      enum:
+        - CAD
+        - MXN
+        - USD
+      default: USD
+
+    MessageStatus:
+      type: object
+      description: Object containing message status details.
+      properties:
+        status:
+          type: string
+          description: |
+            Indicates the status of the request. <br><br>
+            SUCCESS - Request is successful with no exceptions.<br>
+            FAILURE - Request is unsuccessful due to some exception.<br>
+            WARNING - Request is successful with some exception.
+          examples: [SUCCESS]
+        code:
+          type: string
+          description: Indicates response detail code.
+          examples: [10000000]
+        message:
+          type: string
+          description: Provides information pertaining to the response code.
+          examples: [Transaction was successful.]
+        resolution:
+          type: string
+          description: Provides guidance pertaining to the response code.
+          examples: ['']
+        information:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+              type:
+                type: string
+              message:
+                type: string
+          examples: []
+
+    ChargeType:
+      type: string
+      examples: [LINE_HAUL]
+      description: |
+        Specifies the type of charge applied to a Full Truckload (FTL) shipment.
+
+        Valid values:
+        * LINE_HAUL     - Base transportation charge for moving freight from origin to destination
+        * FUEL          - Fuel surcharge applied to offset fuel price fluctuations
+        * HAZMAT        - Additional charge for handling hazardous materials
+        * ACCESSORIAL   - Additional charge for special or optional services
+        * LUMPER        - Fee paid to third-party labor for loading or unloading freight
+        * TARP          - Charge for tarping flatbed freight
+        * OVERSIZE      - Charge applied when freight exceeds legal size or dimension limits
+        * OVERWEIGHT    - Charge applied when freight exceeds legal weight limits
+        * DETENTION - Charge applied for excessive wait time at pickup or delivery
+      enum:
+        - LINE_HAUL
+        - FUEL
+        - HAZMAT
+        - ACCESSORIAL
+        - DETENTION
+        - LUMPER
+        - TARP
+        - OVERSIZE
+        - OVERWEIGHT
