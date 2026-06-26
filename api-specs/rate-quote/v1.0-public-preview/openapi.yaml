@@ -1,0 +1,80 @@
+openapi: 3.1.0
+info:
+  title: Rate Quote API
+  version: "1.0.0-public-preview"
+  contact:
+    name: DSDC APIs Rate Quote Full Truckload
+    url: https://github.com/dsdcapis/rate-quote-full-truckload
+  license:
+    name: DSDC Repository License
+    url: https://github.com/dsdcapis/rate-quote-full-truckload/blob/main/LICENSE.md
+  description: |
+    # Overview
+
+    The Rate Quote API provides a standard way to request freight rate quotes for
+    Full Truckload (FTL) shipments. It enables shippers, carriers, and third parties
+    to exchange rate information in a consistent, digitized format, reducing manual
+    processes and improving pricing transparency across the supply chain.
+
+    # Value Proposition
+
+    ## Shipper
+
+    Shippers can submit a single standardized rate quote request and receive
+    responses from one or more carriers, allowing them to compare rates, transit
+    times, and service options without managing carrier-specific integrations.
+
+    ## Carrier
+
+    Carriers can receive rate quote requests in a standard format, simplifying
+    connectivity with a large number of shippers and third parties while reducing
+    onboarding costs and manual quoting processes.
+
+    ## 3rd Party
+
+    Third parties such as brokers and 3PLs can embed the Rate Quote API into their
+    platforms to retrieve spot and contract rates programmatically, enabling
+    automated load matching and competitive rate shopping.
+tags:
+  - name: Rate Quote API Standards
+    description: Standards for the FTL Rate Quote API
+paths:
+  /v1/ratequote/app:
+    post:
+      tags:
+        - Rate Quote API Standards
+      summary: Create a rate quote
+      operationId: createRateQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './schemas/schemas.yaml#/components/schemas/RateQuoteRequest'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/RateQuoteResponse'
+
+  /v1/ratequote/app/{quoteId}:
+    get:
+      tags:
+        - Rate Quote API Standards
+      summary: Get a rate quote
+      operationId: getRateQuoteById
+      parameters:
+        - name: quoteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/schemas.yaml#/components/schemas/RateQuoteResponse'
