@@ -33,8 +33,8 @@ loadStaticHtmlToFolder() {
     echo "Creating folder \"$publicFolder/$folder\""
     mkdir -p "$publicFolder/$folder"
 
-    echo "Running redocly/openapi-cli bundle command on \"$currentFolder/$folder/openapi.yaml\" and saving it to \"$publicFolder/$folder/openapi-combined.yaml\""
-    npx @redocly/openapi-cli@latest bundle "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/openapi-combined.yaml" --ext yaml
+    echo "Running redocly/cli bundle command on \"$currentFolder/$folder/openapi.yaml\" and saving it to \"$publicFolder/$folder/openapi-combined.yaml\""
+    npx @redocly/cli@latest bundle "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/openapi-combined.yaml" --ext yaml
 
     echo "Running redocly/cli build-docs command on \"$currentFolder/$folder/openapi.yaml\" and saving it to \"$publicFolder/$folder/index.html\""
     npx @redocly/cli@latest build-docs "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/index.html" --theme.openapi.downloadDefinitionUrl="openapi-combined.yaml"
