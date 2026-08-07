@@ -34,15 +34,17 @@ loadStaticHtmlToFolder() {
     npx @redocly/cli@latest bundle "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/openapi-combined.yaml" --ext yaml
 
     echo "Building docs: \"$currentFolder/$folder/openapi.yaml\""
-    npx @redocly/cli@latest build-docs "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/index.html" --theme.openapi.downloadDefinitionUrl="openapi-combined.yaml" --theme.openapi.hideDownloadButton=true
+    npx @redocly/cli@latest build-docs "$currentFolder/$folder/openapi.yaml" -o "$publicFolder/$folder/index.html" --theme.openapi.downloadDefinitionUrl="openapi-combined.yaml" --theme.openapi.hideDownloadButtons=true
 
     echo "Adding back-to-downloads button: \"$publicFolder/$folder/index.html\""
     IFS='/' read -ra folderParts <<< "$folder"
     local backPath=""
     for ((i=0; i<${#folderParts[@]}; i++)); do backPath="../$backPath"; done
     local backHref="${backPath}index.html"
+    local targetHtml="$publicFolder/$folder/index.html"
+    local backScriptFile=$(mktemp)
 
-    cat >> "$publicFolder/$folder/index.html" << EOF
+    cat > "$backScriptFile" << EOF
 <script>
 (function() {
     var backHref = "$backHref";
@@ -77,6 +79,15 @@ loadStaticHtmlToFolder() {
 })();
 </script>
 EOF
+
+    local bodyCloseLine=$(grep -n "</body>" "$targetHtml" | head -1 | cut -d: -f1)
+    {
+        head -n "$((bodyCloseLine - 1))" "$targetHtml"
+        cat "$backScriptFile"
+        tail -n "+$bodyCloseLine" "$targetHtml"
+    } > "${targetHtml}.tmp"
+    mv "${targetHtml}.tmp" "$targetHtml"
+    rm -f "$backScriptFile"
 }
 
 generateHighLevelIndex() {
@@ -93,7 +104,7 @@ generateHighLevelIndex() {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
-    <script charset="utf-8" type="text/javascript" src="//js.hsforms.net/forms/embed/v2.js"></script>
+    <script charset="utf-8" type="text/javascript" src="https://js.hsforms.net/forms/embed/v2.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
 
@@ -580,12 +591,24 @@ ENDHEAD
 
         function openDownloadModal() {
             if (selectedFiles.length === 0) return;
+            var filesToDownload = selectedFiles.slice();
+
+            if (localStorage.getItem('dsdc_signed_up') === '1') {
+                downloadAsZip(filesToDownload).catch(function(err) {
+                    showToast('Download failed: ' + err.message);
+                });
+                document.querySelectorAll('.download-checkbox:checked').forEach(function(cb) {
+                    cb.checked = false;
+                });
+                updateSelection();
+                return;
+            }
+
             if (typeof hbspt === 'undefined') {
                 showToast('Form is loading, please try again in a moment.');
                 return;
             }
 
-            var filesToDownload = selectedFiles.slice();
             var fileList = filesToDownload.map(function(f) {
                 return f.name.split('/').pop();
             }).join(', ');
@@ -608,6 +631,7 @@ ENDHEAD
                         .change();
                 },
                 onFormSubmitted: function() {
+                    localStorage.setItem('dsdc_signed_up', '1');
                     closeDownloadModal();
                     downloadAsZip(filesToDownload).catch(function(err) {
                         showToast('Download failed: ' + err.message);
