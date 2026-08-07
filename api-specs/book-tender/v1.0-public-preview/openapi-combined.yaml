@@ -1,0 +1,540 @@
+openapi: 3.1.0
+info:
+  title: Tender API
+  version: 1.0.0-public-preview
+  contact:
+    name: DSDC APIs Book Tender Full Truckload
+    url: https://github.com/dsdcapis/full-truckload
+  license:
+    name: DSDC Repository License
+    url: https://github.com/dsdcapis/full-truckload/blob/main/LICENSE.md
+  description: |
+    # Overview
+
+    The Book Tender API provides a standard way to tender Full Truckload (FTL)
+    shipments to carriers. It enables shippers, carriers, and third parties to
+    offer, accept, update, and cancel truckload tenders in a consistent,
+    digitized format, replacing manual processes such as phone calls, faxes,
+    and emails and reducing the time it takes to secure carrier capacity.
+
+    # Value Proposition
+
+    ## Shipper
+
+    Shippers can tender a load to a carrier using a single standardized
+    request, and can update or cancel that tender as needed, reducing the
+    manual effort of phone calls, faxes, and emails traditionally used to
+    secure carrier capacity.
+
+    ## Carrier
+
+    Carriers can receive tender offers in a standard format, simplifying
+    connectivity with a large number of shippers and third parties while
+    reducing onboarding costs and the manual effort required to accept,
+    update, or cancel tenders.
+
+    ## 3rd Party
+
+    Third parties such as brokers and 3PLs can embed the Book Tender API into
+    their platforms to tender loads to carriers programmatically on behalf of
+    shippers, enabling automated capacity sourcing and faster tender
+    turnaround.
+
+    # Product Requirements Document (PRD)
+
+    The Product Requirements Document (PRD) for this API can be found [here](https://dsdcapis.github.io/full-truckload/api-prds/API%20Product%20Requirements%20-%20Book%20Tender.pdf).
+tags:
+  - name: Book Tender API Standards
+    description: Standards for the FTL Book Tender API
+paths:
+  /v1/tender/app:
+    post:
+      tags:
+        - Book Tender API Standards
+      summary: Create a tender
+      operationId: createTender
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenderCreateRequest'
+      responses:
+        '201':
+          description: Tender created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenderActionResponse'
+    put:
+      tags:
+        - Book Tender API Standards
+      summary: Update a tender
+      operationId: updateTender
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenderUpdateRequest'
+      responses:
+        '200':
+          description: Tender updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenderActionResponse'
+    delete:
+      tags:
+        - Book Tender API Standards
+      summary: Cancel a tender
+      operationId: cancelTender
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenderCancelRequest'
+      responses:
+        '200':
+          description: Tender cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenderActionResponse'
+components:
+  schemas:
+    Contact:
+      type: object
+      description: Contact information for a party or stop location. At least one of phone or email should be provided; requests missing both may be rejected by the server (business-rule validation, not schema-enforced).
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+    TenderParty:
+      type: object
+      description: A party involved in the tender (customer, billing, or third party). At least one of name or code should be provided to identify the party; requests missing both may be rejected by the server (business-rule validation, not schema-enforced).
+      properties:
+        type:
+          type: string
+          enum:
+            - CUSTOMER
+            - BILLING
+            - THIRD_PARTY
+        code:
+          type: string
+        name:
+          type: string
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+    StateProvinceCodes:
+      title: State/Province Code
+      type: string
+      description: |
+        State/province/region code.
+
+        Use ISO 3166-2 subdivision codes (e.g., US states, Canadian provinces/territories, Mexican states).
+        Reference: https://en.wikipedia.org/wiki/ISO_3166-2
+    CountryCodes:
+      title: Country Codes
+      type: string
+      description: |
+        Three-letter country code.
+
+        Use ISO 3166-1 alpha-3 country codes.
+        Reference: https://en.wikipedia.org/wiki/ISO_3166-1
+    Address:
+      type: object
+      description: Address details for a tender stop.
+      required:
+        - country
+        - postalCode
+      properties:
+        address1:
+          type: string
+          description: Primary street address line.
+        address2:
+          type: string
+          description: Secondary address details (suite, dock, building, etc.).
+        postalCode:
+          type: string
+          description: Postal/ZIP code for the stop location.
+        state:
+          $ref: '#/components/schemas/StateProvinceCodes'
+        country:
+          $ref: '#/components/schemas/CountryCodes'
+        city:
+          type: string
+          description: City name for the stop location.
+    ClassificationCodes:
+      title: Classification Codes
+      type: string
+      description: |
+        Valid values:
+        * 50
+        * 55
+        * 60
+        * 65
+        * 70
+        * 77.5
+        * 85
+        * 92.5
+        * 100
+        * 110
+        * 125
+        * 150
+        * 175
+        * 200
+        * 250
+        * 300
+        * 400
+        * 500
+        * Not required
+      enum:
+        - '50'
+        - '55'
+        - '60'
+        - '65'
+        - '70'
+        - '77.5'
+        - '85'
+        - '92.5'
+        - '100'
+        - '110'
+        - '125'
+        - '150'
+        - '175'
+        - '200'
+        - '250'
+        - '300'
+        - '400'
+        - '500'
+        - Not required
+    WeightUnit:
+      title: Weight Unit
+      type: string
+      description: The unit of measurement used for weight.
+      enum:
+        - Pounds
+        - Kilograms
+      default: Pounds
+    DimensionsUnit:
+      title: Dimensions Unit
+      type: string
+      description: The unit of measurement used for dimensions.
+      enum:
+        - Feet
+        - Inches
+        - Meters
+      default: Inches
+    Commodity:
+      type: object
+      description: Commodity details for the shipment.
+      required:
+        - id
+        - operation
+        - description
+        - quantity
+        - weight
+        - weightUnit
+        - length
+        - height
+        - width
+        - dimensionsUnit
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        classification:
+          $ref: '#/components/schemas/ClassificationCodes'
+        operation:
+          type: string
+          description: Operation associated with this commodity.
+          enum:
+            - PICKUP
+            - DROP
+        description:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        weight:
+          type: number
+          minimum: 0
+        weightUnit:
+          $ref: '#/components/schemas/WeightUnit'
+        height:
+          type: number
+          minimum: 0
+        length:
+          type: number
+          minimum: 0
+        width:
+          type: number
+          minimum: 0
+        dimensionsUnit:
+          $ref: '#/components/schemas/DimensionsUnit'
+        stackable:
+          type: boolean
+          default: false
+        hazardous:
+          type: boolean
+          default: false
+    ReferenceNumber:
+      type: object
+      description: Extensible key/value metadata for integration and business references.
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    TenderLocation:
+      type: object
+      description: A stop in the shipment route with appointment windows and linked commodity/contact records.
+      required:
+        - sequenceNumber
+        - stopType
+        - address
+      properties:
+        sequenceNumber:
+          type: integer
+          description: Sequence number of the stop in route order.
+        stopType:
+          type: string
+          description: Stop role in the shipment lifecycle.
+          enum:
+            - ORIGIN
+            - INTERMEDIATE
+            - DESTINATION
+        address:
+          $ref: '#/components/schemas/Address'
+        appointmentOpenTime:
+          type: string
+          format: date-time
+          description: Earliest appointment time accepted at this stop.
+        appointmentCloseTime:
+          type: string
+          format: date-time
+          description: Latest appointment time accepted at this stop.
+        contacts:
+          type: array
+          description: Contacts relevant at this stop.
+          items:
+            $ref: '#/components/schemas/Contact'
+        commodities:
+          type: array
+          description: Commodities handled at this stop.
+          items:
+            $ref: '#/components/schemas/Commodity'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferenceNumber'
+    RatingContextAccessorialsRequest:
+      type: object
+      description: Accessorial or service flag used for rating context.
+      required:
+        - key
+        - value
+      properties:
+        key:
+          type: string
+          description: Service or accessorial code (for example, LIFTGATE).
+        context:
+          type: string
+          description: Human-readable label for the service code.
+        value:
+          type: string
+          description: Value associated with the service key.
+    EquipmentAccessoryType:
+      title: Equipment Accessory Type
+      type: string
+      description: Additional equipment requirements applied to service execution.
+      enum:
+        - TARPS
+        - STRAPS
+        - TONNAGE
+        - CHAINS
+    ShipmentDetails:
+      type: object
+      description: Service options and constraints requested for this tender.
+      properties:
+        mode:
+          type: string
+          enum:
+            - LTL
+            - FTL
+            - PARCEL
+        specialInstructions:
+          type: string
+          description: Free-form instructions relevant to service execution (for example, Tanker Endorsed Driver).
+        ratingContextAdditionalServices:
+          type: array
+          description: Accessorial service attributes requested for rating.
+          items:
+            $ref: '#/components/schemas/RatingContextAccessorialsRequest'
+        isTeam:
+          type: boolean
+        isTankerEndorsed:
+          type: boolean
+        equipmentAccessories:
+          type: array
+          description: Additional equipment requirements for the move.
+          items:
+            $ref: '#/components/schemas/EquipmentAccessoryType'
+    TenderUpdateRequest:
+      type: object
+      required:
+        - tenderIdentifier
+      properties:
+        tenderIdentifier:
+          type: string
+        parties:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenderParty'
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenderLocation'
+        shipmentDetails:
+          $ref: '#/components/schemas/ShipmentDetails'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferenceNumber'
+    TenderActionResponse:
+      type: object
+      required:
+        - status
+        - tenderIdentifier
+      properties:
+        status:
+          type: string
+          enum:
+            - CREATED
+            - CANCELLED
+            - UPDATED
+            - ACCEPTED
+            - PENDING
+        tenderIdentifier:
+          type: string
+        details:
+          type: string
+      examples:
+        - status: CREATED
+          tenderIdentifier: TenderNumber-123
+          details: Tender created successfully.
+    TenderCreateRequest:
+      type: object
+      description: Request payload for creating a tender, including parties, stops, shipment details, and freight details.
+      required:
+        - locations
+      properties:
+        parties:
+          type: array
+          description: Parties involved in the tender (customer, billing, or third party).
+          items:
+            $ref: '#/components/schemas/TenderParty'
+        locations:
+          type: array
+          minItems: 2
+          description: Ordered pickup, midpoint, and/or drop stops for the shipment.
+          items:
+            $ref: '#/components/schemas/TenderLocation'
+          examples:
+            - - sequenceNumber: 0
+                stopType: ORIGIN
+                address:
+                  address1: 123 Industrial Way
+                  address2: Dock 4
+                  postalCode: '75001'
+                  state: TX
+                  country: USA
+                  city: Dallas
+                appointmentOpenTime: '2026-02-10T08:00:00Z'
+                appointmentCloseTime: '2026-02-10T12:00:00Z'
+                contacts:
+                  - id: 1
+                    name: John Smith
+                    phone: +1-214-555-0100
+                    email: john.smith@acme.com
+                commodities:
+                  - id: 100
+                    operation: PICKUP
+                    description: Steel Pallets
+                    quantity: 10
+                    weight: 1800
+                    weightUnit: Pounds
+                    height: 5
+                    length: 4
+                    width: 4
+                    dimensionsUnit: Feet
+                    stackable: false
+                    hazardous: false
+                references:
+                  - name: Pickup
+                    value: '55468'
+                  - name: LocationCode
+                    value: DAL-PICK
+              - sequenceNumber: 1
+                stopType: DESTINATION
+                address:
+                  address1: 890 Distribution Blvd
+                  address2: ''
+                  postalCode: '60601'
+                  state: IL
+                  country: USA
+                  city: Chicago
+                appointmentOpenTime: '2026-02-12T09:00:00Z'
+                appointmentCloseTime: '2026-02-12T17:00:00Z'
+                contacts:
+                  - id: 2
+                    name: Jane Doe
+                    phone: +1-312-555-0188
+                    email: jane.doe@acme.com
+                commodities:
+                  - id: 100
+                    operation: DROP
+                    description: Steel Pallets
+                    quantity: 10
+                    weight: 1800
+                    weightUnit: Pounds
+                    height: 5
+                    length: 4
+                    width: 4
+                    dimensionsUnit: Feet
+                    stackable: false
+                    hazardous: false
+                references:
+                  - name: Dropoff
+                    value: '44587'
+                  - name: LocationCode
+                    value: CHI-DROP
+        shipmentDetails:
+          $ref: '#/components/schemas/ShipmentDetails'
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferenceNumber'
+    TenderCancelRequest:
+      type: object
+      required:
+        - tenderIdentifier
+      properties:
+        tenderIdentifier:
+          type: string
+        reason:
+          type: string
+        references:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferenceNumber'
